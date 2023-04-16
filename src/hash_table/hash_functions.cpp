@@ -21,17 +21,6 @@ size_t FirstByteHash (const char *data, const size_t size)
     return data[0];
 }
 
-//=========================================================================
-
-size_t FirstByteHash (const char *data, const size_t size)
-{
-    assert(data != nullptr && "data pointer is nullptr");
-
-    if (size == 0)
-        return 0ull;
-    
-    return data[0];
-}
 
 //=========================================================================
 
@@ -58,7 +47,7 @@ size_t AsciiSumHash(const char *data, const size_t size)
 
 //=========================================================================
 
-size_t LeftShiftHash(const char *data, const size_t size)
+size_t RolHash(const char *data, const size_t size)
 {
     assert(data != nullptr && "data pointer is nullptr");
 
@@ -74,12 +63,11 @@ size_t LeftShiftHash(const char *data, const size_t size)
     }
 
     return hash;
-
 }
 
 //=========================================================================
 
-size_t RightShiftHash(const char *data, const size_t size)
+size_t RorHash(const char *data, const size_t size)
 {
     assert(data != nullptr && "data pointer is nullptr");
 
@@ -95,7 +83,6 @@ size_t RightShiftHash(const char *data, const size_t size)
     }
 
     return hash;
-
 }
 
 //=========================================================================
@@ -117,7 +104,8 @@ size_t FAQ6Hash(const char *data, const size_t size)
     hash += (hash << 15);
 
     return hash;
-
 }
+
+
 
 //=========================================================================

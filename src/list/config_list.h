@@ -16,7 +16,7 @@ const int Poison_ptr  = -126;   //<- Written to a pointer when the list is clear
 
 #define LIST_DATA_CHECK         //<- Checking non-free list nodes for correct transitions and values
 
-#define GRAPH_DUMP
+//#define GRAPH_DUMP
 
 #define ELEM_T_SPEC "p"         //<- specifier character to print elem
 

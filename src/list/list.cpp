@@ -743,9 +743,9 @@ int ListDump_ (const List *list,
             fprintf (fp_logs, "%5d", it);
         fprintf (fp_logs, "\n");
         
-        for (int it = 0; it <= list->capacity; it++)
-            fprintf (fp_logs, "%5d", list->data[it].val);
-        fprintf (fp_logs, "\n");
+        // for (int it = 0; it <= list->capacity; it++)
+        //     fprintf (fp_logs, "%5d", list->data[it].val);
+        // fprintf (fp_logs, "\n");
         
         for (int it = 0; it <= list->capacity; it++)
             fprintf (fp_logs, "%5d", list->data[it].next);
@@ -884,8 +884,8 @@ static int ListDrawLogicalGraph (const List *list)
         int next = list->data[counter].next;
         int prev = list->data[counter].prev;
 
-        fprintf (graph, "node%d [style=filled, shape = record, label =  \"{NODE %d | VAL: %d| prev: %d | next: %d}}\",", 
-                        counter, counter, list->data[counter].val, prev, next);
+        // fprintf (graph, "node%d [style=filled, shape = record, label =  \"{NODE %d | VAL: %d| prev: %d | next: %d}}\",", 
+        //                 counter, counter, list->data[counter].val, prev, next);
 
         if (prev != -1)
             fprintf (graph, " fillcolor=lightpink ];\n");
@@ -973,8 +973,8 @@ static int ListDrawPhysicalGraph (const List *list)
         int next = list->data[counter].next;
         int prev = list->data[counter].prev;
 
-        fprintf (graph, "node%d [style=filled, shape = record, label =  \"{NODE %d | VAL: %d| prev: %d | next: %d}}\",", 
-                        counter, counter, list->data[counter].val, prev, next);
+        // fprintf (graph, "node%d [style=filled, shape = record, label =  \"{NODE %d | VAL: %d| prev: %d | next: %d}}\",", 
+        //                 counter, counter, list->data[counter].val, prev, next);
 
         if (prev != -1)
             fprintf (graph, " fillcolor=lightpink ];\n");

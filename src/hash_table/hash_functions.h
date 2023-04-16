@@ -5,12 +5,10 @@
 #include "../generals_func/generals.h"
 
 
-typedef size_t hash_func_t (const char *data, const size_t size);
+typedef size_t (*hash_func_t) (const char*, const size_t);
 
 
 size_t DumbHash         (const char *data, const size_t size);
-
-size_t FirstByteHash    (const char *data, const size_t size);
 
 size_t FirstByteHash    (const char *data, const size_t size);
 
@@ -18,10 +16,11 @@ size_t  LenHash         (const char *data, const size_t size);
 
 size_t  AsciiSumHash    (const char *data, const size_t size);
 
-size_t  LeftShiftHash   (const char *data, const size_t size);
+size_t  RolHash         (const char *data, const size_t size);
 
-size_t  RightShiftHash  (const char *data, const size_t size);
+size_t  RorHash         (const char *data, const size_t size);
 
 size_t  FAQ6Hash        (const char *data, const size_t size);
+
 
 #endif
