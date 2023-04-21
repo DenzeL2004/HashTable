@@ -48,7 +48,7 @@ int HashTableInsert(Hash_table *hash_table, elem_t val)
 {
     assert(hash_table != nullptr && "hash table ptr is nullptr");
 
-    size_t hash = (*(hash_table->hash_func))(val->str, val->len) % hash_table->capacity;
+    uint32_t hash = (*(hash_table->hash_func))(val->str, val->len) % hash_table->capacity;
 
     ListInsertBack(hash_table->data + hash, val);
     

@@ -24,17 +24,19 @@ int ExeTest (const char *input_file_name)
     if (GetText(&text, input_file_name))
         return PROCESS_ERROR(EXECUTE_TEST_ERR, "file: \'%s\' read failed, no tests run\n", input_file_name);
 
+
     FILE *fpout = OpenFilePtr(Name_result_file, "w");
     if (CheckNullptr(fpout))
         PROCESS_ERROR(EXECUTE_TEST_ERR, "open file: \'%s\' to wite failed\n.", Name_result_file);
+
+    fprintf (fpout, "\n");
 
     for (size_t it = 0; it < Count_hash_func; it++)
     {
         fprintf(fpout,  "\n%s%c ", Hash_function_name[it], Separate_symbol);
 
         TestDistribution(fpout, &text, Hash_function_ptr[it]);
-
-        fprintf(fpout, "\n");
+        fprintf(fpout, "\n\n");
     }
 
     if (CloseFilePtr(fpout))
@@ -63,9 +65,11 @@ static int TestDistribution (FILE *fpout, Text *text, hash_func_t hash_func)
         HashTableInsert(&hash_table, text->words + it);
     }
 
-    for (size_t it = 0; it < hash_table.capacity; it++)
+    for (size_t it = 0; it < hash_table.capacity; it += Step_print)
     {
-        fprintf(fpout, "%ld%c ", hash_table.data[it].size_data, Separate_symbol);
+        fprintf(fpout, "%ld", hash_table.data[it].size_data);
+        if(it + Step_print < Hash_table_capacity)
+            fprintf(fpout, "%c ", Separate_symbol);
     }
 
     if (HashTableDtor(&hash_table))
