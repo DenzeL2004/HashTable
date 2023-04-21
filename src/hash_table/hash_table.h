@@ -7,6 +7,7 @@
 #include "../list/list.h"
 #include "hash_functions.h"
 
+
 struct Hash_table
 {
     size_t capacity = 0;
@@ -31,6 +32,12 @@ int     HashTableCtor       (Hash_table *hash_table, size_t capacity, hash_func_
 int     HashTableDtor       (Hash_table *hash_table);
 
 int     HashTableInsert     (Hash_table *hash_table, elem_t val);
+
+
+long    HashTableFind       (Hash_table *hash_table, elem_t val);
+
+
+int     HashTableErase      (Hash_table *hash_table, elem_t val);
 
 //=======================================================================================
 

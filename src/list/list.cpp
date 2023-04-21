@@ -24,7 +24,7 @@ static int          NotFreeNodeValidity (const List *list);
 
 static int          FreeNodeValidity    (const List *list);
 
-static uint64_t     LIstCheck           (const List *list);
+static uint64_t     ListCheck           (const List *list);
 
 
 static int      ListDrawLogicalGraph    (const List *list);
@@ -80,7 +80,7 @@ int ListDtor (List *list)
 {
     assert (list != nullptr && "list ptr is nullptr");
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: ListDtor\n");
         return LIST_DTOR_ERR;
@@ -110,7 +110,7 @@ static int InitListData (List *list)
 {
     assert (list != nullptr && "list is nullptr");
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: InitListData\n");
         return DATA_INIT_ERR;
@@ -127,7 +127,7 @@ static int InitListData (List *list)
 
     list->cnt_free_nodes = list->capacity - list->size_data;
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("EXIT\nFROM: InitListData\n");
         return DATA_INIT_ERR;
@@ -155,7 +155,7 @@ int ListInsertPrevInd (List *list, const int ind, const elem_t val)
 {
     assert (list != nullptr && "list is nullptr");
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: ListInsertPrevInd,"
                         " ind = %d, val = %d\n", ind, val);
@@ -205,7 +205,7 @@ int ListInsertPrevInd (List *list, const int ind, const elem_t val)
     list->size_data++;
     list->cnt_free_nodes--;
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("EXIT\nFROM: ListInsertPrevInd,"
                         " ind = %d, val = %d\n", ind, val);
@@ -221,7 +221,7 @@ int ListInsertFront (List *list, const elem_t val)
 {
     assert (list != nullptr && "list is nullptr");
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: ListInsertFront %d\n", val);
         return LIST_INSERT_ERR;
@@ -254,7 +254,7 @@ int ListInsertFront (List *list, const elem_t val)
     list->size_data++;
     list->cnt_free_nodes--;
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("EXIT\nFROM: ListInsertFront %d\n", val);
         return LIST_INSERT_ERR;
@@ -269,7 +269,7 @@ int ListInsertBack (List *list, const elem_t val)
 {
     assert (list != nullptr && "list is nullptr");
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: ListInsertBack %d\n", val);
         return LIST_INSERT_ERR;
@@ -299,7 +299,7 @@ int ListInsertBack (List *list, const elem_t val)
     list->size_data++;
     list->cnt_free_nodes--;
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("EXIT\nFROM: ListInsertBack %d\n", val);
         return LIST_INSERT_ERR;
@@ -314,7 +314,7 @@ int ListErase (List *list, const int ind)
 {
     assert (list != nullptr && "list is nullptr");
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: ListErase, ind = %d\n", ind);
         return LIST_ERASE_ERR;
@@ -359,7 +359,7 @@ int ListErase (List *list, const int ind)
     list->size_data--;
     list->cnt_free_nodes++;
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("EXIT\nFROM: ListErase exit, ind = %d\n", ind);
         return LIST_ERASE_ERR;
@@ -374,7 +374,7 @@ static int ListResize (List *list)
 {
     assert (list != nullptr && "list is nullptr");
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: ListResize\n");
         return PTR_OUT_OF_MEMORY_ERR;
@@ -394,7 +394,7 @@ static int ListResize (List *list)
         return 1;
     }
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("EXIT\nFROM: ListResize\n");
         return PTR_OUT_OF_MEMORY_ERR;
@@ -409,7 +409,7 @@ static int ListRecalloc (List *list, int resize_status)
 {
     assert (list != nullptr && "list is nullptr");
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: ListRecalloc\n");
         return LIST_RECALLOC_ERR;
@@ -433,7 +433,7 @@ static int ListRecalloc (List *list, int resize_status)
         return PROCESS_ERROR (LIST_RECALLOC_ERR, "List data initialization error\n");
      
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("EXIT\nFROM: ListRecalloc\n");
         return LIST_RECALLOC_ERR;
@@ -448,7 +448,7 @@ int ListLinearize (List *list)
 {
     assert (list != nullptr && "list is nullptr\n");
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: ListLinearize\n");
         return LIST_LINEARIZE_ERR;
@@ -500,7 +500,7 @@ int ListLinearize (List *list)
 
     list->is_linearized = 1;
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("EXIT\nFROM: ListLinearize\n");
         return LIST_LINEARIZE_ERR;
@@ -515,7 +515,7 @@ int GetLogicalIndex (const List *list, const int ind)
 {
     assert (list != nullptr && "list is nullptr\n");
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: GetLogicalIndex, ind = %d\n", ind);
         return GET_LOGICAL_PTR_ERR;
@@ -561,7 +561,7 @@ elem_t ListGetVal (const List *list, const int ind)
 {
     assert (list != nullptr && "list is nullptr");
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: ListGetVal, ind = %d\n", ind);
         return Poison_val; 
@@ -584,7 +584,7 @@ int ListChangeVal (const List *list, const int ind, const elem_t val)
 {
     assert (list != nullptr && "list is nullptr");
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: ListChangeVal,"
                        " ind = %d, val = %d\n", ind, val);
@@ -599,7 +599,7 @@ int ListChangeVal (const List *list, const int ind, const elem_t val)
 
     list->data[ind].val = val;
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("EXIT\nFROM: ListChangeVal,"
                        " ind = %d, val = %d\n", ind, val);
@@ -615,7 +615,7 @@ static int CheckCorrectIndex (const List *list, const int ind)
 {
     assert (list != nullptr && "list is nullptr");
 
-    if (LIstCheck (list))
+    if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: CheckCorrectIndex, ind = %d", ind);
         return CHECK_IND_ERR; 
@@ -623,7 +623,7 @@ static int CheckCorrectIndex (const List *list, const int ind)
 
     if (ind < 0) return 0;
 
-    if (ind == 0) return 0;
+    if (ind == Invalid_ind) return 0;
 
     if (ind > list->capacity) return 0;
 
@@ -699,7 +699,7 @@ int ListDump_ (const List *list,
 {
     assert (list != nullptr && "list is nullptr\n");
 
-    uint64_t err = LIstCheck (list);
+    uint64_t err = ListCheck (list);
 
     FILE *fp_logs = GetLogFilePtr ();
 
@@ -1027,7 +1027,7 @@ static int ListDrawPhysicalGraph (const List *list)
 
 //======================================================================================
 
-static uint64_t LIstCheck (const List *list)
+static uint64_t ListCheck (const List *list)
 {
     assert (list != nullptr && "list is nullptr");
 

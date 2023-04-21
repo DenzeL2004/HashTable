@@ -40,7 +40,7 @@ int ExeTest (const char *input_file_name)
     }
 
     if (CloseFilePtr(fpout))
-        PROCESS_ERROR(EXECUTE_TEST_ERR, "%p| failed", (char*)fpout);
+        PROCESS_ERROR(EXECUTE_TEST_ERR, "|%p| failed", (char*)fpout);
 
     if (TextDtor(&text))
         return PROCESS_ERROR(EXECUTE_TEST_ERR, "TextDtor failed\n");
@@ -71,6 +71,8 @@ static int TestDistribution (FILE *fpout, Text *text, hash_func_t hash_func)
         if(it + Step_print < Hash_table_capacity)
             fprintf(fpout, "%c ", Separate_symbol);
     }
+
+
 
     if (HashTableDtor(&hash_table))
         return PROCESS_ERROR(DISTRIBUTION_TEST_ERR, "HashTableDtor failed.\n");

@@ -56,3 +56,50 @@ int HashTableInsert(Hash_table *hash_table, elem_t val)
 }
 
 //=========================================================================
+
+long HashTableFind(Hash_table *hash_table, elem_t val)
+{
+    assert(hash_table != nullptr && "hash table ptr is nullptr");
+
+    uint32_t hash = (*(hash_table->hash_func))(val->str, val->len) % hash_table->capacity;
+
+    long list_capacity = hash_table->data[hash].capacity;
+    size_t val_len = val->len;
+
+    for (long it = 1; it <= list_capacity; it++)
+    {
+        elem_t cur_val = ListGetVal(&(hash_table->data[hash]), it);
+        
+        if (cur_val->len == val->len)
+        {
+            if (!strncmp(cur_val->str, val->str, val_len))
+                return it;
+        }
+    }
+
+    return Invalid_ind;
+}
+
+//=========================================================================
+
+
+int HashTableErase(Hash_table *hash_table, elem_t val)
+{
+    assert(hash_table != nullptr && "hash table ptr is nullptr");
+
+    int ind = HashTableFind(hash_table, val);
+
+    if (ind == Invalid_ind)
+    {
+        LOG_REPORT("No item in table\n");
+        return 0;
+    }
+
+    uint32_t hash = (*(hash_table->hash_func))(val->str, val->len) % hash_table->capacity;
+
+    ListErase(&(hash_table->data[hash]), ind);
+
+    return 0;
+}
+
+//=========================================================================

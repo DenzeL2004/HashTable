@@ -11,6 +11,8 @@ const elem_t Poison_val = nullptr;  //<- In free nodes is written
 
 const int Poison_ptr  = -126;   //<- Written to a pointer when the list is cleared
 
+const int Invalid_ind = 0;
+
 #define USE_LOG                 //<- connect when we use logs
 
 
