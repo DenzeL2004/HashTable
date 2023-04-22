@@ -15,6 +15,8 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+#include <time.h>
+
 #include <ctype.h>
 #include <fcntl.h>
 

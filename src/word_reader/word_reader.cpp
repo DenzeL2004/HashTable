@@ -109,12 +109,14 @@ static int ParseText(Text *text_str)
     size_t char_it = 0;
     size_t word_it = 0;
 
-    while (char_it < text_str->file_size)
+    size_t file_size = text_str->file_size;
+
+    while (char_it < file_size)
     {
         if (isalpha(text_str->buffer[char_it]))
         {
             size_t start_pos = char_it;
-            while (isalpha(text_str->buffer[char_it]))
+            while (char_it < file_size && isalpha(text_str->buffer[char_it]))
             {
                 char_it++;
             }
@@ -141,17 +143,20 @@ static size_t GetCountWord(Text *text_str)
     size_t word_cnt = 0;
     size_t char_it  = 0;
 
-    while (char_it < text_str->file_size)
+    size_t file_siz = text_str->file_size;
+
+    while (char_it < file_siz)
     {
         if (isalpha(text_str->buffer[char_it]))
         {
             word_cnt++;
-            while (isalpha(text_str->buffer[char_it]))
+            while (char_it < file_siz && isalpha(text_str->buffer[char_it]))
             {
                 char_it++;
             }
 
-            text_str->buffer[char_it] = '\0';   
+            if (char_it < file_siz)
+                text_str->buffer[char_it] = '\0';   
         }
         
         char_it++;

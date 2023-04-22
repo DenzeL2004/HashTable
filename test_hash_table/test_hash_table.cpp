@@ -10,9 +10,11 @@
 //============================================================================================
 
 
-static int          TestDistribution (FILE *fpout, const Text *text);
+static int          TestDistribution    (FILE *fpout, const Text *text);
 
-inline static int   LoadData         (Hash_table *hash_table, const Text *text);
+static int          TestFind            (FILE *fpout, const Text *text);
+
+inline static int   LoadData            (Hash_table *hash_table, const Text *text);
 
 int ExeTest (const char *input_file_name)
 {
@@ -28,6 +30,8 @@ int ExeTest (const char *input_file_name)
         return PROCESS_ERROR(EXECUTE_TEST_ERR, "file: \'%s\' read failed, no tests run\n", input_file_name);
 
 
+    #ifdef TEST_DISTRIBUTION
+
     FILE *fpout = OpenFilePtr(Name_result_file, "w");
     if (CheckNullptr(fpout))
         PROCESS_ERROR(EXECUTE_TEST_ERR, "open file: \'%s\' to wite failed\n.", Name_result_file);
@@ -36,6 +40,22 @@ int ExeTest (const char *input_file_name)
 
     if (CloseFilePtr(fpout))
         PROCESS_ERROR(EXECUTE_TEST_ERR, "|%p| failed", (char*)fpout);
+
+    #endif
+
+    #ifdef TEST_FIND
+
+    FILE *fpout = OpenFilePtr(Name_result_file, "w");
+    if (CheckNullptr(fpout))
+        PROCESS_ERROR(EXECUTE_TEST_ERR, "open file: \'%s\' to wite failed\n.", Name_result_file);
+
+    TestFind(fpout, &text);
+
+    if (CloseFilePtr(fpout))
+        PROCESS_ERROR(EXECUTE_TEST_ERR, "|%p| failed", (char*)fpout);
+
+    #endif
+
 
     if (TextDtor(&text))
         return PROCESS_ERROR(EXECUTE_TEST_ERR, "TextDtor failed\n");
@@ -73,6 +93,41 @@ static int TestDistribution(FILE *fpout, const Text *text)
         
         fprintf(fpout, "\n\n");
     }
+
+    return 0;
+}
+
+//======================================================================================================
+
+static int TestFind(FILE *fpout, const Text *text)
+{
+    assert(fpout != nullptr && "fpout is nullptr");
+    assert(text  != nullptr && "text is nullptr");
+
+    Hash_table hash_table = {};
+    if (HashTableCtor(&hash_table, Hash_table_capacity, (hash_func_t)CRC32Hash))
+        return PROCESS_ERROR(DISTRIBUTION_TEST_ERR, "HashTableCtor failed.\n");
+
+    LoadData(&hash_table, text);
+
+    srand(time(NULL));
+
+    for (size_t it = 0; it < Count_query; it++)
+    {
+        size_t find_ind = rand() % text->word_cnt;
+
+        clock_t time_start  = clock();
+        long ind = HashTableFind(&hash_table, &(text->words[find_ind]));
+        clock_t time_finish = clock();
+
+        double res_time = 1000.0 * (time_finish - time_start) / CLOCKS_PER_SEC;
+        fprintf(fpout, "%s: %.4lg\n", text->words[find_ind].str, res_time);
+    }
+
+
+    if (HashTableDtor(&hash_table))
+        return PROCESS_ERROR(DISTRIBUTION_TEST_ERR, "HashTableDtor failed.\n");
+        
 
     return 0;
 }

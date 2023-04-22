@@ -96,7 +96,7 @@ uint32_t CRC32Hash(const char *data, const size_t size)
 
     for (size_t it = 0; it < size; it++)
     {
-        hash = (hash >> 8) ^ Crc32Table[(hash ^ data[it]) & 0xFF];
+        hash = (hash >> 8) ^ CRC32Table[(hash ^ data[it]) & 0xFF];
     }
 
     return hash ^ Init_val;

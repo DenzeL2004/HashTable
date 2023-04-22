@@ -9,4 +9,10 @@ const size_t Hash_table_capacity = 1001ul;
 
 const size_t Step_print = 1;
 
+const size_t Count_query = 10000;
+
+//#define TEST_DISTRIBUTION
+
+#define TEST_FIND
+
 #endif
