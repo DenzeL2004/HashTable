@@ -9,7 +9,10 @@
 
 //============================================================================================
 
-static int TestDistribution (FILE *fpout, Text *text, hash_func_t hash_func);
+
+static int          TestDistribution (FILE *fpout, const Text *text);
+
+inline static int   LoadData         (Hash_table *hash_table, const Text *text);
 
 int ExeTest (const char *input_file_name)
 {
@@ -29,15 +32,7 @@ int ExeTest (const char *input_file_name)
     if (CheckNullptr(fpout))
         PROCESS_ERROR(EXECUTE_TEST_ERR, "open file: \'%s\' to wite failed\n.", Name_result_file);
 
-    fprintf (fpout, "\n");
-
-    for (size_t it = 0; it < Count_hash_func; it++)
-    {
-        fprintf(fpout,  "\n%s%c ", Hash_function_name[it], Separate_symbol);
-
-        TestDistribution(fpout, &text, Hash_function_ptr[it]);
-        fprintf(fpout, "\n\n");
-    }
+    TestDistribution(fpout, &text);
 
     if (CloseFilePtr(fpout))
         PROCESS_ERROR(EXECUTE_TEST_ERR, "|%p| failed", (char*)fpout);
@@ -50,34 +45,51 @@ int ExeTest (const char *input_file_name)
 
 //======================================================================================================
 
-static int TestDistribution (FILE *fpout, Text *text, hash_func_t hash_func)
+static int TestDistribution(FILE *fpout, const Text *text)
 {
-    assert(fpout      != nullptr && "fpout is nullptr");
-    assert(text       != nullptr && "text is nullptr");
-    assert(hash_func  != nullptr && "haszh table is nullptr");
+    assert(fpout != nullptr && "fpout is nullptr");
+    assert(text  != nullptr && "text is nullptr");
 
-    Hash_table hash_table = {};
-    if (HashTableCtor(&hash_table, Hash_table_capacity, hash_func))
-        return PROCESS_ERROR(DISTRIBUTION_TEST_ERR, "HashTableCtor failed.\n");
-
-    for (size_t it = 0; it < text->word_cnt; it++)
+    for (size_t hash_func_num = 0; hash_func_num < Count_hash_func; hash_func_num++)
     {
-        HashTableInsert(&hash_table, text->words + it);
+        fprintf(fpout,  "\n%s%c ", Hash_function_name[hash_func_num], Separate_symbol);
+
+        Hash_table hash_table = {};
+        if (HashTableCtor(&hash_table, Hash_table_capacity, Hash_function_ptr[hash_func_num]))
+            return PROCESS_ERROR(DISTRIBUTION_TEST_ERR, "HashTableCtor failed.\n");
+
+        LoadData(&hash_table, text);
+
+        for (size_t it = 0; it < hash_table.capacity; it += Step_print)
+        {
+            fprintf(fpout, "%ld", hash_table.data[it].size_data);
+            if(it + Step_print < Hash_table_capacity)
+                fprintf(fpout, "%c ", Separate_symbol);
+        }
+
+
+        if (HashTableDtor(&hash_table))
+            return PROCESS_ERROR(DISTRIBUTION_TEST_ERR, "HashTableDtor failed.\n");
+        
+        fprintf(fpout, "\n\n");
     }
-
-    for (size_t it = 0; it < hash_table.capacity; it += Step_print)
-    {
-        fprintf(fpout, "%ld", hash_table.data[it].size_data);
-        if(it + Step_print < Hash_table_capacity)
-            fprintf(fpout, "%c ", Separate_symbol);
-    }
-
-
-
-    if (HashTableDtor(&hash_table))
-        return PROCESS_ERROR(DISTRIBUTION_TEST_ERR, "HashTableDtor failed.\n");
 
     return 0;
 }
+
+//======================================================================================================
+
+inline static int LoadData(Hash_table *hash_table, const Text *text)
+{
+    assert(hash_table != nullptr && "hash table is nullptr");
+    assert(text != nullptr && "text is nullptr");
+
+    for (size_t it = 0; it < text->word_cnt; it++)
+    {
+        HashTableInsert(hash_table, text->words + it);
+    }
+
+    return 0;
+} 
 
 //======================================================================================================

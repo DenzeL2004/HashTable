@@ -63,14 +63,15 @@ long HashTableFind(Hash_table *hash_table, elem_t val)
 
     uint32_t hash = (*(hash_table->hash_func))(val->str, val->len) % hash_table->capacity;
 
-    long list_capacity = hash_table->data[hash].capacity;
+    long list_size = hash_table->data[hash].size_data;
     size_t val_len = val->len;
 
-    for (long it = 1; it <= list_capacity; it++)
+    for (int it = 1; it <= list_size; it++)
     {
-        elem_t cur_val = ListGetVal(&(hash_table->data[hash]), it);
+        int logical_ind = GetLogicalIndex(&(hash_table->data[hash]), it);
+        elem_t cur_val = ListGetVal(&(hash_table->data[hash]), logical_ind);
         
-        if (cur_val->len == val->len)
+        if (cur_val->len == val_len)
         {
             if (!strncmp(cur_val->str, val->str, val_len))
                 return it;
