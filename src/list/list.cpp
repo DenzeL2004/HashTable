@@ -18,13 +18,13 @@ static int          ListRecalloc        (List *list, int ver_resize);
 
 static void         InitNode            (Node *list_elem, elem_t val, int next, int prev);
 
-static int          CheckCorrectIndex   (const List *list, const int ind);
+inline static int   CheckCorrectIndex   (const List *list, const int ind);
 
 static int          NotFreeNodeValidity (const List *list);
 
 static int          FreeNodeValidity    (const List *list);
 
-static uint64_t     ListCheck           (const List *list);
+static uint64_t     ListCheck_          (const List *list);
 
 
 static int      ListDrawLogicalGraph    (const List *list);
@@ -41,7 +41,17 @@ static void     PrintListErrors         (uint64_t err, FILE *fpout);
         ERR_REPORT (__VA_ARGS__);                           \
                                                             \
     }while (0)
-                                    
+
+#ifdef CHECK_LIST 
+
+#define ListCheck(list)                                       \
+        ListCheck_(list)
+#else
+
+#define ListCheck(list)                                       \
+        false
+
+#endif                  
 //======================================================================================
 
 int ListCtor (List *list, long capacity)
@@ -318,7 +328,8 @@ int ListErase (List *list, const int ind)
     {
         REPORT ("ENTRY\nFROM: ListErase, ind = %d\n", ind);
         return LIST_ERASE_ERR;
-    }   
+    }
+   
     
     if (!CheckCorrectIndex (list, ind))
         return PROCESS_ERROR (LIST_ERASE_ERR, "Incorrect ind = %d\n", ind);
@@ -611,7 +622,7 @@ int ListChangeVal (const List *list, const int ind, const elem_t val)
 
 //======================================================================================
 
-static int CheckCorrectIndex (const List *list, const int ind)
+inline static int CheckCorrectIndex (const List *list, const int ind)
 {
     assert (list != nullptr && "list is nullptr");
 
@@ -699,7 +710,7 @@ int ListDump_ (const List *list,
 {
     assert (list != nullptr && "list is nullptr\n");
 
-    uint64_t err = ListCheck (list);
+    uint64_t err = ListCheck_ (list);
 
     FILE *fp_logs = GetLogFilePtr ();
 
@@ -1027,7 +1038,7 @@ static int ListDrawPhysicalGraph (const List *list)
 
 //======================================================================================
 
-static uint64_t ListCheck (const List *list)
+static uint64_t ListCheck_ (const List *list)
 {
     assert (list != nullptr && "list is nullptr");
 

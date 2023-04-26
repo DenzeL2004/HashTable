@@ -18,6 +18,8 @@ const int Invalid_ind = 0;
 
 #define LIST_DATA_CHECK         //<- Checking non-free list nodes for correct transitions and values
 
+//#define CHECK_LIST
+
 //#define GRAPH_DUMP
 
 #define ELEM_T_SPEC "p"         //<- specifier character to print elem

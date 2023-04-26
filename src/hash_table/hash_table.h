@@ -12,7 +12,7 @@ struct Hash_table
 {
     size_t capacity = 0;
 
-    List *data = nullptr;
+    List *containers = nullptr;
 
     hash_func_t hash_func = nullptr;
 };

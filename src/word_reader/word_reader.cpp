@@ -80,7 +80,7 @@ static int ReadFromFile(Text *text_str, int fdin)
 
     text_str->file_size = file_info.st_size;
 
-    text_str->buffer = (char*)calloc(text_str->file_size, sizeof(char));
+    text_str->buffer = (char*)calloc(text_str->file_size + 10, sizeof(char));
     if (CheckNullptr(text_str->buffer))
         return PROCESS_ERROR(TEXT_STR_CTOR_ERR, "memory allocation failed\n");
        
