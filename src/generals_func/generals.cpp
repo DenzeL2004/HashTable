@@ -79,28 +79,6 @@ int BinRepresent(FILE *fpout, size_t elem, uint64_t size_elem)
 
 //======================================================================================
 
-uint64_t GetDataHash (const char *data, uint64_t len) 
-{
-	assert (data != nullptr && "data is nullptr");
-
-    uint64_t hash = 0;
-
-    for (uint64_t num_bit = 0; num_bit < len; num_bit++) 
-    {
-        hash += (unsigned char) data[num_bit];
-        hash += (hash << 10);
-        hash ^= (hash >> 6);
-	}
-
-    hash += (hash << 3);
-    hash ^= (hash >> 11);
-    hash += (hash << 15);
-	
-	return hash;
-}
-
-//======================================================================================
-
 void PrintColour (char const colour[], char const *str, ...){
     printf ("%s", colour);
 
@@ -253,11 +231,8 @@ char* MyStrndub (const char *str, const int len)
 
 //======================================================================================
 
-int Factorial (int ord)
+size_t Factorial (const size_t ord)
 {
-	if (ord < 0)
-		return Inf;
-
 	if (ord == 0)
 		return 1;
 	
@@ -326,6 +301,36 @@ char *CreateAlignedBuffer(const size_t alignment, const size_t size)
 	}
 	
 	return buffer;
+}
+
+//========================================================================================
+
+int FastStrncmp(const char *str1, const char *str2, const size_t len)
+{
+	assert(str1 != nullptr && "src is nullptr");
+	assert(str2 != nullptr && "src is nullptr");
+
+	size_t cnt_repeat = len / 8;
+
+	for (size_t it = 0; it < cnt_repeat; it++)
+	{
+		__m256i str1_ = _mm256_loadu_si256((__m256i*) str1);
+		__m256i str2_ = _mm256_loadu_si256((__m256i*) str2);
+
+		__m256i cmp_ = _mm256_cmpeq_epi8(str1_, str2_);
+
+		size_t mask = _mm256_movemask_epi8(cmp_);
+		
+		if (!mask) return 0;
+	}
+
+	for (size_t it = cnt_repeat * 8; it < len; it++)
+	{
+		if (str1[it] != str2[it])
+			return 0;
+	}
+
+	return 1;
 }
 
 //========================================================================================

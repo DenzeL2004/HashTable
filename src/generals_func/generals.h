@@ -26,6 +26,8 @@
 
 #include <syscall.h>
 
+#include <immintrin.h>
+
 #define MIN(a, b) ((a) < (b) ? (а) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
@@ -59,7 +61,8 @@ static const int Init_buffer = 100;
  * @enum Errors
  * @brief Represents the status of errors
 */
-enum Errors {
+enum Errors 
+{
     ERR_MEMORY_ALLOC        = -1,          ///< Memory is not allocated
     ERR_INIT_BUF            = -2,          ///< Buffer has not been initialized
     ERR_FILE_READING        = -3,          ///< Not all data was read from the file
@@ -83,24 +86,12 @@ enum Errors {
     ERR_FREE_VIRTUAL_BUF    = -17,
 };
 
-enum Comparison{
-    DIFRENT = -1,
-    EQUAL   = 0
+enum Comparison
+{
+    DIFFERENT = -1,
+    EQUAL     =  0
 };
 
-/**
- * @struct Options
- * @brief Represents the status of flags
-*/
-struct Options{
-    bool read_on_file   = 0;
-    const char *file_input_name  = nullptr;
-
-    bool write_on_file  = 0;
-    const char *file_output_name = nullptr;
-
-    bool info_option    = 0;
-};
 
 inline bool CheckNullptr  (void *ptr)
 {
@@ -112,9 +103,9 @@ inline int Dump_func (int val)
     return val;
 }
 
-void MyFlush ();
+void    MyFlush();
 
-bool CheckNum (const char *str);
+bool    CheckNum        (const char *str);
 
 /** 
  * @brief Comparison of double variables
@@ -123,7 +114,7 @@ bool CheckNum (const char *str);
  * @param [in] num2 input double parameter
  * @return False - number is not equal, true - number is equal
 */
-bool EqualityDouble (double num1, double num2);
+bool    EqualityDouble  (double num1, double num2);
 
 /** 
  * @brief Comparing a number to zero
@@ -131,7 +122,7 @@ bool EqualityDouble (double num1, double num2);
  * @param [in] n input parameter
  * @return False - number is not zero, true - number is zero
 */
-bool IsZero (double num);
+bool    IsZero          (double num);
 
 /** 
  * @brief Correct zero value
@@ -140,14 +131,11 @@ bool IsZero (double num);
  * @note If the value is zero the program must not return -0.00
  * @return Returns zero if the number is zero, otherwise returns the number itself
 */
-double FixZero (double num);
+double  FixZero         (double num);
 
-int BinRepresent (FILE *fpout, size_t elem, uint64_t size_elem);
+int     BinRepresent    (FILE *fpout, size_t elem, uint64_t size_elem);
 
-int ClearData (unsigned char *cmd_hash_tabel, size_t size_data);
-
-uint64_t GetDataHash (const char *data, uint64_t len);
-
+int     ClearData       (unsigned char *cmd_hash_tabel, size_t size_data);
 
 /** 
  * @brief Paints a line
@@ -155,7 +143,7 @@ uint64_t GetDataHash (const char *data, uint64_t len);
  * @param [in] colour colour you want to paint a string
  * @param [in] str line to be colored
 */
-void PrintColour (char const colour[], char const *str, ...);
+void    PrintColour     (char const colour[], char const *str, ...);
 
 /**
  * @brief Opens a file in a specific mode
@@ -163,18 +151,18 @@ void PrintColour (char const colour[], char const *str, ...);
  * @param [in] mode Open file access modes
  * @return Pointer on file 
  */
-FILE *OpenFilePtr (const char *name_file, const char *mode);
+FILE*   OpenFilePtr     (const char *name_file, const char *mode);
 
 /**
  * @brief Close a file
  * @param [in] fp Pointer of file 
  * @return Zero - if closing happened without error 
  */
-char CloseFilePtr (FILE *fp);
+char    CloseFilePtr        (FILE *fp);
 
-int OpenFileDescriptor (const char *name_file, const int mode);
+int     OpenFileDescriptor  (const char *name_file, const int mode);
 
-char CloseFileDescriptor (int fd);
+char    CloseFileDescriptor (int fd);
 
 /**
  * @brief Swaps the values of variables
@@ -183,16 +171,19 @@ char CloseFileDescriptor (int fd);
  * @param size_type [in] size of variables in bytes
  * @return Returns zero if the variables have changed values 
  */
-int MySwap (void *obj1, void *obj2, size_t size_type);
+int     MySwap              (void *obj1, void *obj2, size_t size_type);
 
-char* MyStrndub (const char *str, const int len);
+char*   MyStrndub           (const char *str, const int len);
 
-int Factorial (int ord);
+size_t  Factorial           (const size_t ord);
 
-char* CreateVirtualBuf (const int fdin, const int prot, const off_t offset);
+char*   CreateVirtualBuf    (const int fdin, const int prot, const off_t offset);
 
-int FreeVirtualBuf (const int fdin, char *virtual_buf);
+int     FreeVirtualBuf      (const int fdin, char *virtual_buf);
 
-char *CreateAlignedBuffer(const size_t alignment, const size_t size);
+char*   CreateAlignedBuffer (const size_t alignment, const size_t size);
+
+
+int     FastStrncmp         (const char *str1, const char *str2, const size_t len);
 
 #endif

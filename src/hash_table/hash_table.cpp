@@ -91,7 +91,6 @@ int HashTableErase(Hash_table *hash_table, elem_t val)
     assert(hash_table != nullptr && "hash table ptr is nullptr");
 
     int ind = HashTableFind(hash_table, val);
-
     if (ind == Invalid_ind)
     {
         LOG_REPORT("No item in table\n");
