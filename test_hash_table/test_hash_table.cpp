@@ -1,7 +1,7 @@
 #include "../src/word_reader/word_reader.h"
 #include "../src/hash_table/hash_table.h"
 
-#include "../src/hash_table/hash_functions.h"
+//#include "../src/hash_table/hash_functions.h"
 
 #include "test_hash_table.h"
 
@@ -97,7 +97,7 @@ static int TestFind(const Text *text)
     assert(text  != nullptr && "text is nullptr");
 
     Hash_table hash_table = {};
-    if (HashTableCtor(&hash_table, Hash_table_capacity, (hash_func_t)CRC32Hash))
+    if (HashTableCtor(&hash_table, Hash_table_capacity, (hash_func_t)NASMCRC32))
         return PROCESS_ERROR(DISTRIBUTION_TEST_ERR, "HashTableCtor failed.\n");
 
     LoadData(&hash_table, text);
