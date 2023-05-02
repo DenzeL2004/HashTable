@@ -97,7 +97,7 @@ static int TestFind(const Text *text)
     assert(text  != nullptr && "text is nullptr");
 
     Hash_table hash_table = {};
-    if (HashTableCtor(&hash_table, Hash_table_capacity, (hash_func_t)NASMCRC32))
+    if (HashTableCtor(&hash_table, Hash_table_capacity, (hash_func_t)FastCRC32Hash))    //::OPTIMIZE
         return PROCESS_ERROR(DISTRIBUTION_TEST_ERR, "HashTableCtor failed.\n");
 
     LoadData(&hash_table, text);
@@ -107,7 +107,7 @@ static int TestFind(const Text *text)
     for (size_t it = 0; it < Count_query; it++)
     {
         size_t find_ind = rand() % text->word_cnt;
-        long ind = HashTableFind(&hash_table, &(text->words[find_ind]));
+        long int ind = HashTableFind(&hash_table, &(text->words[find_ind]));
     }
 
     if (HashTableDtor(&hash_table))

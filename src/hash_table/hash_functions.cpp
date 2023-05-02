@@ -69,7 +69,7 @@ const uint32_t CRC32Table[256] = {
 
 //=========================================================================
 
-uint32_t DumbHash (const char *data, const size_t size)
+hash_t DumbHash (const char *data, const size_t size)
 {
     assert(data != nullptr && "data pointer is nullptr");
 
@@ -78,7 +78,7 @@ uint32_t DumbHash (const char *data, const size_t size)
 
 //=========================================================================
 
-uint32_t FirstByteHash (const char *data, const size_t size)
+hash_t FirstByteHash (const char *data, const size_t size)
 {
     assert(data != nullptr && "data pointer is nullptr");
 
@@ -91,20 +91,20 @@ uint32_t FirstByteHash (const char *data, const size_t size)
 
 //=========================================================================
 
-uint32_t LenHash(const char *data, const size_t size)
+hash_t LenHash(const char *data, const size_t size)
 {
     assert(data != nullptr && "data pointer is nullptr");
 
-    return (uint32_t)size;
+    return (hash_t)size;
 }
 
 //=========================================================================
 
-uint32_t AsciiSumHash(const char *data, const size_t size)
+hash_t AsciiSumHash(const char *data, const size_t size)
 {
     assert(data != nullptr && "data pointer is nullptr");
 
-    uint32_t hash = 0u;
+    hash_t hash = 0u;
 
     for (size_t it = 0; it < size; it++)
         hash += data[it];
@@ -114,13 +114,13 @@ uint32_t AsciiSumHash(const char *data, const size_t size)
 
 //=========================================================================
 
-uint32_t RolHash(const char *data, const size_t size)
+hash_t RolHash(const char *data, const size_t size)
 {
     assert(data != nullptr && "data pointer is nullptr");
 
     const uint32_t Shift = sizeof(uint32_t) * 8 - 1;
 
-    uint32_t hash = 0u;
+    hash_t hash = 0u;
 
     for (size_t it = 0; it < size; it++)
     {
@@ -134,13 +134,13 @@ uint32_t RolHash(const char *data, const size_t size)
 
 //=========================================================================
 
-uint32_t RorHash(const char *data, const size_t size)
+hash_t RorHash(const char *data, const size_t size)
 {
     assert(data != nullptr && "data pointer is nullptr");
 
     const uint32_t Shift = sizeof(uint32_t) * 8 - 1;
 
-    uint32_t hash = 0u;
+    hash_t hash = 0u;
 
     for (size_t it = 0; it < size; it++)
     {
@@ -153,13 +153,13 @@ uint32_t RorHash(const char *data, const size_t size)
 
 //=========================================================================
 
-uint32_t CRC32Hash(const char *data, const size_t size)
+hash_t CRC32Hash(const char *data, const size_t size)
 {
     assert(data != nullptr && "data pointer is nullptr");
 
     const uint32_t Init_val = 0xFFFFFFFFu; 
 
-    uint32_t hash = Init_val;
+    hash_t hash = Init_val;
 
     for (size_t it = 0; it < size; it++)
     {
@@ -170,3 +170,29 @@ uint32_t CRC32Hash(const char *data, const size_t size)
 }
 
 //=========================================================================
+
+hash_t FastCRC32Hash(const char *data, const size_t size)
+{
+    assert(data != nullptr && "data pointer is nullptr");
+
+    hash_t hash = 0;
+
+    for (size_t i = 0; i < (size / sizeof(uint32_t)); ++i) 
+    {
+		hash = _mm_crc32_u32(hash, *(const uint32_t*)data);
+		data += sizeof(uint32_t);
+	}
+	if (size & sizeof(uint16_t)) 
+    {
+		hash = _mm_crc32_u16(hash, *(const uint16_t*)data);
+		data += sizeof(uint16_t);
+	}
+
+	if (size & sizeof(uint8_t)) 
+    {
+		hash = _mm_crc32_u8(hash, *(const uint8_t*)data);
+	}
+
+    return hash;
+}
+

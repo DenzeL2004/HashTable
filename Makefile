@@ -8,8 +8,8 @@ FLAGS = -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equa
 
 OPTIMIZE_FLAG = -O1 -mavx2 -msse4
 
-run: 	 		obj/generals.o obj/log_errors.o obj/word_reader.o obj/list.o obj/hash_table.o obj/hash_func.o obj/nasm_crc32.o obj/test.o obj/main.o
-	g++ -no-pie obj/generals.o obj/log_errors.o obj/word_reader.o obj/list.o obj/hash_table.o obj/hash_func.o obj/nasm_crc32.o obj/test.o obj/main.o -o run $(OPTIMIZE_FLAG)
+run: 	 		 obj/generals.o obj/log_errors.o obj/word_reader.o obj/list.o obj/hash_table.o obj/hash_func.o obj/test.o obj/main.o obj/GetLogicalIndex.o
+	g++ -no-pie  obj/generals.o obj/log_errors.o obj/word_reader.o obj/list.o obj/hash_table.o obj/hash_func.o obj/test.o obj/main.o obj/GetLogicalIndex.o -o run $(OPTIMIZE_FLAG)
 
 
 obj/main.o: main.cpp
@@ -41,8 +41,10 @@ obj/hash_func.o: src/hash_table/hash_functions.cpp src/hash_table/hash_functions
 			 g++ src/hash_table/hash_functions.cpp -c -o obj/hash_func.o $(OPTIMIZE_FLAG) $(FLAGS)
 
 
-obj/nasm_crc32.o: 	  src/hash_table/NASMCRC32.s src/hash_table/hash_functions.h
-		nasm -f elf64 src/hash_table/NASMCRC32.s -o obj/nasm_crc32.o
+
+obj/GetLogicalIndex.o:	  src/list/GetLogicalIndex.s 
+			nasm -f elf64 src/list/GetLogicalIndex.s -o obj/GetLogicalIndex.o
+
 
 
 .PHONY: cleanup mkdirectory

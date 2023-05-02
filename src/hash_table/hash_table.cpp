@@ -71,12 +71,13 @@ long HashTableFind(Hash_table *hash_table, elem_t val)
 
     for (int it = 1; it <= list_size; it++)
     {
-        int logical_ind = GetLogicalIndex(&(hash_table->containers[hash]), it);
+        long logical_ind = NASMGetLogicalIndex(&(hash_table->containers[hash]), it); //::OPTIMIZE
+        //printf ("logical index %ld\n", logical_ind);
         elem_t cur_val  = ListGetVal(&(hash_table->containers[hash]), logical_ind);
         
         if (cur_val->len == val_len)
         {
-            if (FastStrncmp(cur_val->str, val->str, val_len))
+            if (FastStrncmp(cur_val->str, val->str, val_len))      //::OPTIMIZE
             {
                 //printf ("%s %s\n", cur_val->str, val->str);
                 return it;

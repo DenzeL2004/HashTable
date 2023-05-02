@@ -141,4 +141,7 @@ int ListLinearize (List *list);
 int ListDump_ (const List *list,
                 const char* file_name, const char* func_name, int line, const char *format, ...);
 
+
+extern "C" int NASMGetLogicalIndex(const List *list, const int ind);
+
 #endif  //#endif _LIST_H_

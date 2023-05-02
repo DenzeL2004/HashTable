@@ -16,7 +16,8 @@ static const char* Hash_function_name[] =
     "AsciiSumHash",    
     "RolHash",    
     "RorHash",  
-    "CRC32Hash"        
+    "CRC32Hash",
+    "FastCRC32Hash"         
 };
 
 const hash_func_t Hash_function_ptr[] = 
@@ -27,7 +28,8 @@ const hash_func_t Hash_function_ptr[] =
     AsciiSumHash,    
     RolHash,   
     RorHash,  
-    CRC32Hash        
+    CRC32Hash,
+    FastCRC32Hash       
 };
 
 const size_t Count_hash_func = sizeof(Hash_function_name) / sizeof(Hash_function_name[0]);
