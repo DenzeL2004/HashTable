@@ -97,10 +97,13 @@ static int TestFind(const Text *text)
     assert(text  != nullptr && "text is nullptr");
 
     Hash_table hash_table = {};
-    if (HashTableCtor(&hash_table, Hash_table_capacity, (hash_func_t)FastCRC32Hash))    //::OPTIMIZE
+    if (HashTableCtor(&hash_table, Hash_table_capacity, (hash_func_t)CRC32Hash))
         return PROCESS_ERROR(DISTRIBUTION_TEST_ERR, "HashTableCtor failed.\n");
 
     LoadData(&hash_table, text);
+
+
+    #ifdef RANDOM_ELEMENT_FIND
 
     srand(time(NULL));
 
@@ -109,6 +112,26 @@ static int TestFind(const Text *text)
         size_t find_ind = rand() % text->word_cnt;
         long int ind = HashTableFind(&hash_table, &(text->words[find_ind]));
     }
+
+    #else
+
+    Text test_text = {};
+    
+    if (TextCtor(&test_text))
+        return PROCESS_ERROR(EXECUTE_TEST_ERR, "TextCtor failed\n");
+
+    if (GetText(&test_text, Test_input_file))
+        return PROCESS_ERROR(EXECUTE_TEST_ERR, "file: \'%s\' read failed, no tests run\n", Test_input_file);
+
+    for (size_t it = 0; it < Count_query; it++)
+    {
+        long int ind = HashTableFind(&hash_table, &(test_text.words[it]));
+    }
+
+    if (TextDtor(&test_text))
+        return PROCESS_ERROR(EXECUTE_TEST_ERR, "TextDtor failed\n");
+
+    #endif
 
     if (HashTableDtor(&hash_table))
         return PROCESS_ERROR(DISTRIBUTION_TEST_ERR, "HashTableDtor failed.\n");

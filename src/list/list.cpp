@@ -532,16 +532,8 @@ int GetLogicalIndex (const List *list, const int ind)
         return GET_LOGICAL_PTR_ERR;
     }   
 
-    if (!CheckCorrectIndex (list, ind) && 
-         list->data[ind].prev != Identifier_free_node)
-    {
-        return PROCESS_ERROR (GET_LOGICAL_PTR_ERR, "Incorrect ind = %d\n", ind);
-    }
-
-    if (ind > list->size_data)
+    if (ind > list->size_data || ind < 0 || ind == Invalid_ind)
         return PROCESS_ERROR (GET_LOGICAL_PTR_ERR, "Number of elements of the requested index.\nind = %d\n", ind);
-       
-
 
     if (list->is_linearized)
     {
@@ -578,7 +570,7 @@ elem_t ListGetVal (const List *list, const int ind)
         return Poison_val; 
     }
 
-    if (!CheckCorrectIndex (list, ind))
+    if (ind > list->size_data || ind < 0 || ind == Invalid_ind)
     {
         PROCESS_ERROR (GET_VAL_ERR, "Incorrect ind = %d\n", ind);
         return Poison_val;
@@ -587,6 +579,33 @@ elem_t ListGetVal (const List *list, const int ind)
     //No list re-validation as list items don't change
 
     return list->data[ind].val;
+}
+
+//======================================================================================
+
+elem_t ASMListGetVal (const List *list, const int ind)
+{
+    assert (list != nullptr && "list is nullptr");
+
+    if (ind > list->size_data || ind < 0 || ind == Invalid_ind)
+    {
+        PROCESS_ERROR (GET_VAL_ERR, "Incorrect ind = %d\n", ind);
+        return Poison_val;
+    }
+
+    elem_t val = nullptr;
+    __asm__ (
+        ".intel_syntax noprefix\n\t"
+        "movsx   rsi, %1\n\t"
+        "sal     rsi, 4\n\t"
+        "add     rsi, qword ptr [%2+24]\n\t"
+        "mov     %0,  qword ptr [rsi]\n\t"
+
+        : "=r"(val)
+        : "r"(ind), "r"(list)
+    );
+
+    return val;
 }
 
 //======================================================================================

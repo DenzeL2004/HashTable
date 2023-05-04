@@ -20,7 +20,7 @@ hash_t      AsciiSumHash    (const char *data, const size_t size);
 hash_t      RolHash         (const char *data, const size_t size);
     
 hash_t      RorHash         (const char *data, const size_t size);
-    
+
 hash_t      CRC32Hash       (const char *data, const size_t size);
     
 hash_t      FastCRC32Hash   (const char *data, const size_t size);

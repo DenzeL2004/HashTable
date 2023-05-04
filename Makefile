@@ -31,7 +31,7 @@ obj/generals.o: src/generals_func/generals.cpp src/generals_func/generals.h
 
 
 obj/list.o: src/list/list.cpp src/list/list.h src/list/config_list.h
-		g++ src/list/list.cpp -c -o obj/list.o $(OPTIMIZE_FLAG) $(FLAGS)
+		g++ src/list/list.cpp -c -masm=intel  -o obj/list.o $(OPTIMIZE_FLAG) $(FLAGS)
 
 
 obj/hash_table.o: src/hash_table/hash_table.cpp src/hash_table/hash_table.h 

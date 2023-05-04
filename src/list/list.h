@@ -144,4 +144,8 @@ int ListDump_ (const List *list,
 
 extern "C" int NASMGetLogicalIndex(const List *list, const int ind);
 
+elem_t ASMListGetVal (const List *list, const int ind);
+
+extern "C" elem_t NASMListGetVal (const List *list, const int ind);
+
 #endif  //#endif _LIST_H_

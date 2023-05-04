@@ -182,6 +182,7 @@ hash_t FastCRC32Hash(const char *data, const size_t size)
 		hash = _mm_crc32_u32(hash, *(const uint32_t*)data);
 		data += sizeof(uint32_t);
 	}
+    
 	if (size & sizeof(uint16_t)) 
     {
 		hash = _mm_crc32_u16(hash, *(const uint16_t*)data);
