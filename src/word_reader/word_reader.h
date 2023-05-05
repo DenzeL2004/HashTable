@@ -21,6 +21,8 @@ struct Text
 
     Word *words = nullptr;
     size_t word_cnt      = 0;
+
+    int fdin    = 0;
 };
 
 enum Word_reader_errors

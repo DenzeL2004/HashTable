@@ -29,7 +29,6 @@ int ExeTest (const char *input_file_name)
     if (GetText(&text, input_file_name))
         return PROCESS_ERROR(EXECUTE_TEST_ERR, "file: \'%s\' read failed, no tests run\n", input_file_name);
 
-
     #ifdef TEST_DISTRIBUTION
 
     FILE *fpout = OpenFilePtr(Name_result_file, "w");
