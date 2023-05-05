@@ -4,9 +4,9 @@
 #include "../log_info/log_errors.h"
 #include "../generals_func/generals.h"
 
-#include "../list/list.h"
+//#include "../list/list.h"
+#include "../nodelist/list.h"
 #include "hash_functions.h"
-
 
 struct Hash_table
 {
@@ -31,13 +31,13 @@ int     HashTableCtor       (Hash_table *hash_table, size_t capacity, hash_func_
 
 int     HashTableDtor       (Hash_table *hash_table);
 
-int     HashTableInsert     (Hash_table *hash_table, elem_t val);
+int     HashTableInsert     (Hash_table *hash_table, const data_t data);
 
 
-long    HashTableFind       (Hash_table *hash_table, elem_t val);
+size_t  HashTableFind       (Hash_table *hash_table, const data_t data);
 
 
-int     HashTableErase      (Hash_table *hash_table, elem_t val);
+int     HashTableErase      (Hash_table *hash_table, const data_t data);
 
 //=======================================================================================
 

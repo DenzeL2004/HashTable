@@ -75,7 +75,7 @@ static int TestDistribution(FILE *fpout, const Text *text)
 
         for (size_t it = 0; it < hash_table.capacity; it += Step_print)
         {
-            fprintf(fpout, "%ld", hash_table.containers[it].size_data);
+            fprintf(fpout, "%ld", hash_table.containers[it].size);
             if(it + Step_print < Hash_table_capacity)
                 fprintf(fpout, "%c ", Separate_symbol);
         }
@@ -97,7 +97,7 @@ static int TestFind(const Text *text)
     assert(text  != nullptr && "text is nullptr");
 
     Hash_table hash_table = {};
-    if (HashTableCtor(&hash_table, Hash_table_capacity, (hash_func_t)CRC32Hash))
+    if (HashTableCtor(&hash_table, Hash_table_capacity, (hash_func_t)FastCRC32Hash))
         return PROCESS_ERROR(DISTRIBUTION_TEST_ERR, "HashTableCtor failed.\n");
 
     LoadData(&hash_table, text);
@@ -125,7 +125,7 @@ static int TestFind(const Text *text)
 
     for (size_t it = 0; it < Count_query; it++)
     {
-        long int ind = HashTableFind(&hash_table, &(test_text.words[it]));
+        size_t ind = HashTableFind(&hash_table, &(test_text.words[it]));
     }
 
     if (TextDtor(&test_text))

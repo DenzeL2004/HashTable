@@ -52,25 +52,32 @@ NASMGetLogicalIndex:
 
 NASMListGetVal:
 
-        test    rdi, rdi                        ;------------------
-        je     .not_valid                       ;if list ptr == nullptr 
+        xor     eax, eax
 
-        cmp    rsi, qword [rdi+8]               ;------------------
-        jg     .not_valid                       ;if ind > list->size_data
+        test    rdi, rdi                        ;check list isn't nullptr
+        je      .exit                           ;------------------------
 
-        test    esi, esi                        ;-----------
-        jle     .not_valid                      ;if ind <= 0
+        lea     rdx, [rsi-1]
+        cmp     rdx, qword [rdi+16]             ;check ind > list's size || ind == 0
+        jnb     .exit                           ;-----------------------------------
 
-    
-        movsx   rsi, esi
-        sal     rsi, 4
-        add     rsi, qword [rdi+24]
-        mov     rax, qword [rsi]
+        mov     rax, qword [rdi]                ;ans = list.head
 
+        test    rdx, rdx                        ;-------------
+        je      .break                          ;check ind = 1
+
+        test    dl, 1
+        je      .loop
+        sub     rsi, 2
+        mov     rax, qword [rax+16]
+        mov     rdx, rsi
+        je      .break
+.loop:
+        mov     rax, qword [rax+16]
+        mov     rax, qword [rax+16]
+        sub     rdx, 2
+        jne     .loop
+.break:
+        mov     rax, qword [rax]                ;return ans.val
+.exit:
         ret
-
-.not_valid:
-
-        mov eax, -1
-        ret
-

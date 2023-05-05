@@ -16,7 +16,7 @@ int HashTableCtor(Hash_table *hash_table, size_t capacity, hash_func_t hash_func
 
     for (size_t it = 0; it < capacity; it++)
     {
-        if (ListCtor(hash_table->containers + it, Init_list_capacity))
+        if (ListCtor(hash_table->containers + it))
             return PROCESS_ERROR(HASH_TABLE_CTOR_ERR, "Ctor list by index: %lu failed\n", it);
     }
 
@@ -47,62 +47,63 @@ int HashTableDtor(Hash_table *hash_table)
 
 //=========================================================================
 
-int HashTableInsert(Hash_table *hash_table, elem_t val)
+int HashTableInsert(Hash_table *hash_table, const data_t data)
 {
     assert(hash_table != nullptr && "hash table ptr is nullptr");
 
-    uint32_t hash =  (uint32_t)((*(hash_table->hash_func))(val->str, val->len) % hash_table->capacity);
+    uint32_t hash =  (uint32_t)((*(hash_table->hash_func))(data->str, data->len) % hash_table->capacity);
 
-    ListInsertBack(hash_table->containers + hash, val);
+    ListInsertBack(hash_table->containers + hash, data);
     
     return 0;
 }
 
 //=========================================================================
 
-long HashTableFind(Hash_table *hash_table, elem_t val)
+size_t HashTableFind(Hash_table *hash_table, const data_t data)
 {
     assert(hash_table != nullptr && "hash table ptr is nullptr");
 
-    uint32_t hash = (uint32_t)((*(hash_table->hash_func))(val->str, val->len) % hash_table->capacity);
+    uint32_t hash = (uint32_t)((*(hash_table->hash_func))(data->str, data->len) % hash_table->capacity);
 
-    long list_size = hash_table->containers[hash].size_data;
-    size_t val_len = val->len;
+    size_t list_size = hash_table->containers[hash].size;
+    size_t val_len = data->len;
 
-    for (int it = 1; it <= list_size; it++)
+    for (size_t it = 1; it <= list_size; it++)
     {
-        int logical_ind = NASMGetLogicalIndex(&(hash_table->containers[hash]), it);         //::OPTIMIZE
-        elem_t cur_val  = NASMListGetVal(&(hash_table->containers[hash]), logical_ind);     //::OPTIMIZE
+        // int logical_ind = NASMGetLogicalIndex(&(hash_table->containers[hash]), it);          //::OPTIMIZE
+        data_t cur_val  = NASMListGetVal(&(hash_table->containers[hash]), it);                    //::OPTIMIZE
 
         if (cur_val->len == val_len)
         {
-            if (FastStrncmp(cur_val->str, val->str, val_len))                                //::OPTIMIZE
+            //printf ("%s %s\n", cur_val->str, data->str);
+            if (FastStrncmp(cur_val->str, data->str, val_len))                                //::OPTIMIZE
             {
+                //printf ("%s %s\n", cur_val->str, data->str);
                 return it;
             }
         }
     }
 
-    return Invalid_ind;
+    return Invalid_index;
 }
 
 //=========================================================================
 
 
-int HashTableErase(Hash_table *hash_table, elem_t val)
+int HashTableErase(Hash_table *hash_table, const data_t data)
 {
     assert(hash_table != nullptr && "hash table ptr is nullptr");
 
-    int ind = HashTableFind(hash_table, val);
-    if (ind == Invalid_ind)
+    uint32_t hash =  (uint32_t)((*(hash_table->hash_func))(data->str, data->len) % hash_table->capacity);
+    
+    if (!ListContain(&(hash_table->containers[hash]), data))
     {
         LOG_REPORT("No item in table\n");
         return 0;
     }
 
-    uint32_t hash =  (uint32_t)((*(hash_table->hash_func))(val->str, val->len) % hash_table->capacity);
-
-    ListErase(&(hash_table->containers[hash]), ind);
+    ListErase(hash_table->containers + hash, data);
 
     return 0;
 }
