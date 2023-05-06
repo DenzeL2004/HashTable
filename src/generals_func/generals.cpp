@@ -255,7 +255,7 @@ char* CreateVirtualBuf (const int fdin, const int prot, const off_t offset)
 
     if (buf_ptr == MAP_FAILED)
     {
-        fprintf (stderr, "craete virtual buffer failed. "
+        fprintf (stderr, "create virtual buffer failed. "
                           "Buf_ptr = MAP_FAILED.\nDiscriptor: %d\n", fdin);
         return nullptr;
     }
@@ -303,6 +303,7 @@ char *CreateAlignedBuffer(const size_t alignment, const size_t size)
 	return buffer;
 }
 
+//TODO: unusing len
 //========================================================================================
 
 int FastStrncmp(const char *str1, const char *str2, const size_t len)

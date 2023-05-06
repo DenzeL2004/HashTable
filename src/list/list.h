@@ -5,28 +5,28 @@
 #include "../log_info/log_def.h"
 #include "../generals_func/generals.h"
 
-const int Identifier_free_node = -1;
+const size_t Identifier_free_node = -1;
 
-const int Dummy_element = 0;
+const elem_t Dummy_element = nullptr;
 
 struct Node
 {
     elem_t val = 0;
-    int next = 0;
-    int prev = 0;
+    size_t next = 0;
+    size_t prev = 0;
 };
 
 struct List
 {
-    long capacity       = 0;
-    long size_data      = 0; 
-    long cnt_free_nodes = 0;
+    size_t capacity       = 0;
+    size_t size_data      = 0; 
+    size_t cnt_free_nodes = 0;
 
     Node *data = nullptr;
 
-    int head_ptr  = 0;
-    int tail_ptr  = 0;
-    int free_ptr  = 0;
+    size_t head_ptr  = 0;
+    size_t tail_ptr  = 0;
+    size_t free_ptr  = 0;
 
     int is_linearized = 0; 
 };
@@ -59,12 +59,13 @@ enum List_func_err
     
     LIST_DRAW_GRAPH_ERR     = -17,
     LIST_GET_VAL_ERR        = -18,
+
+    LIST_FIND_VAL_ERR       = -19,
+    LIST_CONTAIN_VAL_ERR    = -20,
 };
 
 enum List_err
 {
-    NEGATIVE_SIZE               = (1 << 0),
-    NEGATIVE_CAPACITY           = (1 << 1),
     CAPACITY_LOWER_SIZE         = (1 << 2),
 
     ILLIQUID_FREE_PTR           = (1 << 3),
@@ -83,7 +84,7 @@ enum List_err
 
 
 
-int ListCtor (List *list, const long capacity);
+int ListCtor (List *list, const size_t capacity);
 
 int ListDtor (List *list);
 
@@ -96,11 +97,11 @@ int ListDtor (List *list);
  * @param [in] val The value of the added node
  * @return If a vertex has been added, it returns the Physical Pointer where the element is located, otherwise a negative number
 */
-int ListInsertPrevInd (List *list, const int ind, const elem_t val);
+size_t ListInsertPrevInd (List *list, const size_t ind, const elem_t val);
 
-int ListInsertFront     (List *list, const elem_t val);
+size_t ListInsertFront     (List *list, const elem_t val);
 
-int ListInsertBack      (List *list, const elem_t val);
+size_t ListInsertBack      (List *list, const elem_t val);
 
 
 /** 
@@ -110,10 +111,10 @@ int ListInsertBack      (List *list, const elem_t val);
  * @param [in] ind The pointer by which we will delete the node. (The node at the given index must be initialized)
  * @return Returns zero if the node is deleted, otherwise returns a non-zero number
 */
-int ListErase (List *list, const int ind);
+int ListErase (List *list, const size_t ind);
 
 
-int GetLogicalIndex (const List *list, const int ind);
+size_t GetLogicalIndex (const List *list, const size_t ind);
 
 
 /**
@@ -122,7 +123,10 @@ int GetLogicalIndex (const List *list, const int ind);
  * @param [in] ind The physical index by which we will get the node. (The node at the given index must be initialized)
  * @return Returns a poison value if an element referencing error has occurred, otherwise the return value is assumed to be the actual value of the node
 */
-elem_t ListGetVal    (const List *list, const int ind);
+elem_t ListGetVal    (const List *list, const size_t ind);
+
+
+size_t ListFindVal   (const List *list, const elem_t val);
 
 /** 
  * @brief Change value by physical index
@@ -131,7 +135,7 @@ elem_t ListGetVal    (const List *list, const int ind);
  * @param [in] ind The pointer by which we will chage the node. (The node at the given index must be initialized)
  * @return Returns zero if the node is change, otherwise returns a non-zero number
 */
-int ListChangeVal (const List *list, const int ind, const elem_t val);
+int ListChangeVal (const List *list, const size_t ind, const elem_t val);
 
 int ListLinearize (List *list);
 
@@ -142,10 +146,10 @@ int ListDump_ (const List *list,
                 const char* file_name, const char* func_name, int line, const char *format, ...);
 
 
-extern "C" int NASMGetLogicalIndex(const List *list, const int ind);
+extern "C" int NASMGetLogicalIndex(const List *list, const size_t ind);
 
-elem_t ASMListGetVal (const List *list, const int ind);
+//elem_t ASMListGetVal (const List *list, const size_t ind);
 
-extern "C" elem_t NASMListGetVal (const List *list, const int ind);
+extern "C" elem_t NASMListGetVal (const List *list, const size_t ind);
 
 #endif  //#endif _LIST_H_
