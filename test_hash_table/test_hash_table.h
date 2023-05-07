@@ -40,6 +40,8 @@ enum Test_hash_table_err
     EXECUTE_TEST_ERR        = -1,
 
     DISTRIBUTION_TEST_ERR   = -2,
+
+    FIND_TEST_ERR           = -3,
 };
 
 //=============================================================================================
