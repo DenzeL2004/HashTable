@@ -302,35 +302,3 @@ char *CreateAlignedBuffer(const size_t alignment, const size_t size)
 	
 	return buffer;
 }
-
-//========================================================================================
-
-int FastStrncmp(const char *str1, const char *str2, const size_t len)
-{
-	assert(str1 != nullptr && "src is nullptr");
-	assert(str2 != nullptr && "src is nullptr");
-
-	size_t cnt_repeat = len / 8;
-
-	for (size_t it = 0; it < cnt_repeat; it++)
-	{
-		__m256i str1_ = _mm256_loadu_si256((__m256i*) str1);
-		__m256i str2_ = _mm256_loadu_si256((__m256i*) str2);
-
-		__m256i cmp_ = _mm256_cmpeq_epi8(str1_, str2_);
-
-		size_t mask = _mm256_movemask_epi8(cmp_);
-		
-		if (!mask) return 0;
-	}
-
-	for (size_t it = cnt_repeat * 8; it < len; it++)
-	{
-		if (str1[it] != str2[it])
-			return 0;
-	}
-
-	return 1;
-}
-
-//========================================================================================

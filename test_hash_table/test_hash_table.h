@@ -16,7 +16,7 @@ static const char* Hash_function_name[] =
     "AsciiSumHash",    
     "RolHash",    
     "RorHash",  
-    "CRC32Hash"        
+    "CRC32Hash"      
 };
 
 const hash_func_t Hash_function_ptr[] = 
@@ -27,7 +27,7 @@ const hash_func_t Hash_function_ptr[] =
     AsciiSumHash,    
     RolHash,   
     RorHash,  
-    CRC32Hash        
+    CRC32Hash       
 };
 
 const size_t Count_hash_func = sizeof(Hash_function_name) / sizeof(Hash_function_name[0]);
@@ -38,6 +38,8 @@ enum Test_hash_table_err
     EXECUTE_TEST_ERR        = -1,
 
     DISTRIBUTION_TEST_ERR   = -2,
+
+    FIND_TEST_ERR           = -3,
 };
 
 //=============================================================================================

@@ -12,7 +12,7 @@ struct Hash_table
 {
     size_t capacity = 0;
 
-    List *containers = nullptr;
+    List *buckets = nullptr;
 
     hash_func_t hash_func = nullptr;
 };
@@ -31,13 +31,13 @@ int     HashTableCtor       (Hash_table *hash_table, size_t capacity, hash_func_
 
 int     HashTableDtor       (Hash_table *hash_table);
 
-int     HashTableInsert     (Hash_table *hash_table, elem_t val);
+int     HashTableInsert     (Hash_table *hash_table, const elem_t val);
 
 
-long    HashTableFind       (Hash_table *hash_table, elem_t val);
+size_t    HashTableFind     (Hash_table *hash_table, const elem_t val);
 
 
-int     HashTableErase      (Hash_table *hash_table, elem_t val);
+int     HashTableErase      (Hash_table *hash_table, const elem_t val);
 
 //=======================================================================================
 

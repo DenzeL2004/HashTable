@@ -10,26 +10,24 @@
 #include "../generals_func/generals.h"
 
 
-static int          InitListData        (List *list);
+static int              InitListData        (List *list);
 
-static int          ListResize          (List *list);
+static int              ListResize          (List *list);
 
-static int          ListRecalloc        (List *list, int ver_resize);
+static int              ListRecalloc        (List *list, int ver_resize);
 
-static void         InitNode            (Node *list_elem, elem_t val, int next, int prev);
+static void             InitNode            (Node *list_elem, elem_t val, size_t next, size_t prev);
 
-inline static int   CheckCorrectIndex   (const List *list, const int ind);
+inline static size_t    CheckCorrectIndex   (const List *list, const size_t ind);
 
-static int          NotFreeNodeValidity (const List *list);
+static int              NotFreeNodeValidity (const List *list);
 
-static int          FreeNodeValidity    (const List *list);
+static int              FreeNodeValidity    (const List *list);
 
-static uint64_t     ListCheck_          (const List *list);
+static uint64_t         ListCheck           (const List *list);
 
 
 static int      ListDrawLogicalGraph    (const List *list);
-
-static int      ListDrawPhysicalGraph   (const List *list);
 
 static void     DrawListVariable        (const List *list, FILE *fpout);
 
@@ -42,27 +40,14 @@ static void     PrintListErrors         (uint64_t err, FILE *fpout);
                                                             \
     }while (0)
 
-#ifdef CHECK_LIST 
-
-#define ListCheck(list)                                       \
-        ListCheck_(list)
-#else
-
-#define ListCheck(list)                                       \
-        false
-
-#endif                  
 //======================================================================================
 
-int ListCtor (List *list, long capacity)
+int ListCtor (List *list, const size_t capacity)
 {
     assert (list != nullptr && "list is nullptr");
 
-    if (capacity <= 0)
-        return PROCESS_ERROR (LIST_CTOR_ERR, "Incorrectly entered capacity values: %d\n", capacity);
-
-    list->tail_ptr = Dummy_element;
-    list->head_ptr = Dummy_element;
+    list->tail_ptr = Invalid_ind;
+    list->head_ptr = Invalid_ind;
     list->free_ptr = 1;
 
     list->is_linearized = 1;
@@ -76,7 +61,7 @@ int ListCtor (List *list, long capacity)
     if (CheckNullptr(list->data))
         return PROCESS_ERROR(LIST_CTOR_ERR, "Memory allocation error\n");
     
-    InitNode (&list->data[0], Poison_val, Dummy_element, Dummy_element);
+    InitNode (&list->data[0], Poison_val, Invalid_ind, Invalid_ind);
 
     if (InitListData(list))
         return PROCESS_ERROR (LIST_CTOR_ERR, "Node initialization error\n");
@@ -90,11 +75,16 @@ int ListDtor (List *list)
 {
     assert (list != nullptr && "list ptr is nullptr");
 
+
+    #ifdef CHECK_LIST 
+
     if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: ListDtor\n");
         return LIST_DTOR_ERR;
     }
+    
+    #endif
 
     if (CheckNullptr (list->data))
         LOG_REPORT ("Data is nullptr in dtor\n");
@@ -120,16 +110,19 @@ static int InitListData (List *list)
 {
     assert (list != nullptr && "list is nullptr");
 
+    #ifdef CHECK_LIST 
+
     if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: InitListData\n");
         return DATA_INIT_ERR;
     }
 
-    int Last_used_node = MAX (list->tail_ptr, list->head_ptr);
+    #endif
 
+    size_t Last_used_node = MAX (list->tail_ptr, list->head_ptr);
 
-    for (int ip = Last_used_node + 1; ip < list->capacity; ip++) 
+    for (size_t ip = Last_used_node + 1; ip < list->capacity; ip++) 
         InitNode (list->data + ip, Poison_val, ip + 1, Identifier_free_node);
 
     InitNode (list->data + list->capacity, Poison_val, Identifier_free_node, Identifier_free_node);
@@ -137,18 +130,22 @@ static int InitListData (List *list)
 
     list->cnt_free_nodes = list->capacity - list->size_data;
 
+    #ifdef CHECK_LIST 
+
     if (ListCheck (list))
     {
         REPORT ("EXIT\nFROM: InitListData\n");
         return DATA_INIT_ERR;
     }
 
+    #endif
+
     return 0;
 }
 
 //======================================================================================
 
-static void InitNode (Node *list_elem, elem_t val, int next, int prev)
+static void InitNode (Node *list_elem, elem_t val, size_t next, size_t prev)
 {
     assert (list_elem != nullptr && "list_elem ptr is nullptr");
 
@@ -161,27 +158,31 @@ static void InitNode (Node *list_elem, elem_t val, int next, int prev)
 
 //======================================================================================
 
-int ListInsertPrevInd (List *list, const int ind, const elem_t val) 
+size_t ListInsertPrevInd (List *list, const size_t ind, const elem_t val) 
 {
     assert (list != nullptr && "list is nullptr");
+
+    #ifdef CHECK_LIST 
 
     if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: ListInsertPrevInd,"
-                        " ind = %d, val = %d\n", ind, val);
+                        " ind = %d\n", ind);
         return LIST_INSERT_ERR;
     }
+
+    #endif
     
     int ver_resize = ListResize (list);
     if (ListRecalloc (list, ver_resize))
         return PROCESS_ERROR (LIST_INSERT_ERR, "Recalloc error\n");
 
-    if (!CheckCorrectIndex (list, ind) && ind != Dummy_element)
+    if (!CheckCorrectIndex (list, ind) && ind != Invalid_ind)
         return PROCESS_ERROR (LIST_INSERT_ERR, "Incorrect ind = %d\n", ind);
       
 
     
-    if (list->free_ptr == Dummy_element)
+    if (list->free_ptr == Invalid_ind)
         return PROCESS_ERROR (LIST_INSERT_ERR, "No free space in list\n");
 
 
@@ -196,46 +197,54 @@ int ListInsertPrevInd (List *list, const int ind, const elem_t val)
         list->is_linearized = 0;
 
     
-    int  prev_ptr      = ind;
-    int  cur_free_ptr  = list->free_ptr;
+    size_t  prev_ptr      = ind;
+    size_t  cur_free_ptr  = list->free_ptr;
 
     list->free_ptr = list->data[cur_free_ptr].next;  
     
     InitNode (list->data + cur_free_ptr, 
                val, list->data[prev_ptr].next, prev_ptr);
     
-    int next_ptr = list->data[cur_free_ptr].next;
+    size_t next_ptr = list->data[cur_free_ptr].next;
 
     list->data[next_ptr].prev = cur_free_ptr;
     list->data[prev_ptr].next = cur_free_ptr;
     
-    list->head_ptr = list->data[Dummy_element].next;
-    list->tail_ptr = list->data[Dummy_element].prev;
+    list->head_ptr = list->data[Invalid_ind].next;
+    list->tail_ptr = list->data[Invalid_ind].prev;
 
     list->size_data++;
     list->cnt_free_nodes--;
 
+    #ifdef CHECK_LIST 
+
     if (ListCheck (list))
     {
         REPORT ("EXIT\nFROM: ListInsertPrevInd,"
-                        " ind = %d, val = %d\n", ind, val);
+                        " ind = %lu\n", ind);
         return LIST_INSERT_ERR;
     }
+
+    #endif
 
     return cur_free_ptr;
 }
 
 //======================================================================================
 
-int ListInsertFront (List *list, const elem_t val) 
+size_t ListInsertFront (List *list, const elem_t val) 
 {
     assert (list != nullptr && "list is nullptr");
+
+    #ifdef CHECK_LIST 
 
     if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: ListInsertFront %d\n", val);
         return LIST_INSERT_ERR;
     }
+
+    #endif
     
     int ver_resize = ListResize (list);
     if (ListRecalloc (list, ver_resize))
@@ -245,24 +254,26 @@ int ListInsertFront (List *list, const elem_t val)
         list->is_linearized = 0;
 
     
-    int  prev_ptr      = Dummy_element;
-    int  cur_free_ptr  = list->free_ptr;
+    size_t  prev_ptr      = Invalid_ind;
+    size_t  cur_free_ptr  = list->free_ptr;
 
     list->free_ptr = list->data[cur_free_ptr].next;  
     
     InitNode (list->data + cur_free_ptr, 
                val, list->data[prev_ptr].next, prev_ptr);
     
-    int next_ptr = list->data[cur_free_ptr].next;
+    size_t next_ptr = list->data[cur_free_ptr].next;
 
     list->data[next_ptr].prev = cur_free_ptr;
     list->data[prev_ptr].next = cur_free_ptr;
     
-    list->head_ptr = list->data[Dummy_element].next;
-    list->tail_ptr = list->data[Dummy_element].prev;
+    list->head_ptr = list->data[Invalid_ind].next;
+    list->tail_ptr = list->data[Invalid_ind].prev;
 
     list->size_data++;
     list->cnt_free_nodes--;
+
+    #ifdef CHECK_LIST 
 
     if (ListCheck (list))
     {
@@ -270,14 +281,18 @@ int ListInsertFront (List *list, const elem_t val)
         return LIST_INSERT_ERR;
     }
 
+    #endif
+
     return cur_free_ptr;
 }
 
 //======================================================================================
 
-int ListInsertBack (List *list, const elem_t val) 
+size_t ListInsertBack (List *list, const elem_t val) 
 {
     assert (list != nullptr && "list is nullptr");
+
+    #ifdef CHECK_LIST 
 
     if (ListCheck (list))
     {
@@ -285,29 +300,33 @@ int ListInsertBack (List *list, const elem_t val)
         return LIST_INSERT_ERR;
     }
 
+    #endif
+
     int ver_resize = ListResize (list);
     if (ListRecalloc (list, ver_resize))
         return PROCESS_ERROR (LIST_INSERT_ERR, "Recalloc error\n");
     
     
-    int  prev_ptr      = list->tail_ptr;
-    int  cur_free_ptr  = list->free_ptr;
+    size_t  prev_ptr      = list->tail_ptr;
+    size_t  cur_free_ptr  = list->free_ptr;
 
     list->free_ptr = list->data[cur_free_ptr].next;  
     
     InitNode (list->data + cur_free_ptr, 
                val, list->data[prev_ptr].next, prev_ptr);
     
-    int next_ptr = list->data[cur_free_ptr].next;
+    size_t next_ptr = list->data[cur_free_ptr].next;
 
     list->data[next_ptr].prev = cur_free_ptr;
     list->data[prev_ptr].next = cur_free_ptr;
     
-    list->head_ptr = list->data[Dummy_element].next;
-    list->tail_ptr = list->data[Dummy_element].prev;
+    list->head_ptr = list->data[Invalid_ind].next;
+    list->tail_ptr = list->data[Invalid_ind].prev;
 
     list->size_data++;
     list->cnt_free_nodes--;
+
+    #ifdef CHECK_LIST 
 
     if (ListCheck (list))
     {
@@ -315,29 +334,34 @@ int ListInsertBack (List *list, const elem_t val)
         return LIST_INSERT_ERR;
     }
 
+    #endif
+
     return cur_free_ptr;
 }
 
 //======================================================================================
 
-int ListErase (List *list, const int ind) 
+int ListErase (List *list, const size_t ind) 
 {
     assert (list != nullptr && "list is nullptr");
 
+    #ifdef CHECK_LIST 
+
     if (ListCheck (list))
     {
-        REPORT ("ENTRY\nFROM: ListErase, ind = %d\n", ind);
+        REPORT ("ENTRY\nFROM: ListErase, ind = %lu\n", ind);
         return LIST_ERASE_ERR;
     }
    
+    #endif
     
     if (!CheckCorrectIndex (list, ind))
-        return PROCESS_ERROR (LIST_ERASE_ERR, "Incorrect ind = %d\n", ind);
+        return PROCESS_ERROR (LIST_ERASE_ERR, "Incorrect ind = %lu\n", ind);
 
 
     if (list->data[ind].prev == Identifier_free_node)
     {
-        LOG_REPORT ("There is nothing at this pointer: %d.\n" 
+        LOG_REPORT ("There is nothing at this index: %lu.\n" 
                     "You cannot free a previously freed node\n", ind);
         return LIST_ERASE_ERR;
     }
@@ -352,9 +376,9 @@ int ListErase (List *list, const int ind)
         return PROCESS_ERROR (LIST_INSERT_ERR, "Recalloc error\n");
     
 
-    int  cur_ptr   = ind;
-    int  prev_ptr  = list->data[ind].prev;
-    int  next_ptr  = list->data[ind].next;
+    size_t  cur_ptr   = ind;
+    size_t  prev_ptr  = list->data[ind].prev;
+    size_t  next_ptr  = list->data[ind].next;
 
     list->data[prev_ptr].next = next_ptr;
     list->data[next_ptr].prev = prev_ptr;
@@ -364,17 +388,21 @@ int ListErase (List *list, const int ind)
 
     list->free_ptr = cur_ptr;
 
-    list->head_ptr = list->data[Dummy_element].next;
-    list->tail_ptr = list->data[Dummy_element].prev;
+    list->head_ptr = list->data[Invalid_ind].next;
+    list->tail_ptr = list->data[Invalid_ind].prev;
 
     list->size_data--;
     list->cnt_free_nodes++;
 
+    #ifdef CHECK_LIST 
+
     if (ListCheck (list))
     {
-        REPORT ("EXIT\nFROM: ListErase exit, ind = %d\n", ind);
+        REPORT ("EXIT\nFROM: ListErase exit, ind = %lu\n", ind);
         return LIST_ERASE_ERR;
     }  
+
+    #endif
 
     return 0;
 }
@@ -385,11 +413,15 @@ static int ListResize (List *list)
 {
     assert (list != nullptr && "list is nullptr");
 
+    #ifdef CHECK_LIST 
+
     if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: ListResize\n");
         return PTR_OUT_OF_MEMORY_ERR;
     }   
+
+    #endif
 
     if (list->capacity / 4  <= list->size_data   && 
         list->size_data + 1 < list->capacity / 2 && 
@@ -405,11 +437,15 @@ static int ListResize (List *list)
         return 1;
     }
 
+    #ifdef CHECK_LIST 
+
     if (ListCheck (list))
     {
         REPORT ("EXIT\nFROM: ListResize\n");
         return PTR_OUT_OF_MEMORY_ERR;
     }  
+
+    #endif
 
     return 0;
 }
@@ -420,11 +456,15 @@ static int ListRecalloc (List *list, int resize_status)
 {
     assert (list != nullptr && "list is nullptr");
 
+    #ifdef CHECK_LIST 
+
     if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: ListRecalloc\n");
         return LIST_RECALLOC_ERR;
     } 
+
+    #endif
 
     if (resize_status == 0) return 0;
 
@@ -443,12 +483,15 @@ static int ListRecalloc (List *list, int resize_status)
     if (InitListData (list))
         return PROCESS_ERROR (LIST_RECALLOC_ERR, "List data initialization error\n");
      
+    #ifdef CHECK_LIST 
 
     if (ListCheck (list))
     {
         REPORT ("EXIT\nFROM: ListRecalloc\n");
         return LIST_RECALLOC_ERR;
     } 
+
+    #endif
 
     return 0;
 }
@@ -459,11 +502,15 @@ int ListLinearize (List *list)
 {
     assert (list != nullptr && "list is nullptr\n");
 
+    #ifdef CHECK_LIST 
+
     if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: ListLinearize\n");
         return LIST_LINEARIZE_ERR;
     } 
+
+    #endif
 
     if (list->is_linearized == 1) 
         return 0;
@@ -473,11 +520,11 @@ int ListLinearize (List *list)
     if (CheckNullptr (new_data))
         return PROCESS_ERROR (ERR_MEMORY_ALLOC, "Linearize error, new data memory allocation error\n");
 
-    int logical_ind = list->head_ptr;
+    size_t logical_ind = list->head_ptr;
 
-    InitNode (new_data, Poison_val, 1l, (int)list->size_data);
+    InitNode (new_data, Poison_val, 1l, list->size_data);
 
-    int counter = 1;
+    size_t counter = 1;
 
     while (counter <= list->size_data - 1)
     {
@@ -495,7 +542,7 @@ int ListLinearize (List *list)
     }
 
     InitNode (new_data + counter, 
-               list->data[logical_ind].val, Dummy_element, counter - 1);
+               list->data[logical_ind].val, Invalid_ind, counter - 1);
 
 
     free (list->data);
@@ -503,13 +550,15 @@ int ListLinearize (List *list)
     list->cnt_free_nodes = 0;
 
     list->data = new_data;
-    list->head_ptr = list->data[Dummy_element].next;
-    list->tail_ptr = list->data[Dummy_element].prev;
+    list->head_ptr = list->data[Invalid_ind].next;
+    list->tail_ptr = list->data[Invalid_ind].prev;
 
     if (InitListData (list))
         return PROCESS_ERROR (LIST_LINEARIZE_ERR, "List data initialization error\n");
 
     list->is_linearized = 1;
+
+    #ifdef CHECK_LIST 
 
     if (ListCheck (list))
     {
@@ -517,31 +566,29 @@ int ListLinearize (List *list)
         return LIST_LINEARIZE_ERR;
     }
 
+    #endif
+
     return 0;;
 }
 
 //======================================================================================
 
-int GetLogicalIndex (const List *list, const int ind)
+size_t GetLogicalIndex (const List *list, const size_t ind)
 {
     assert (list != nullptr && "list is nullptr\n");
 
+    #ifdef CHECK_LIST 
+
     if (ListCheck (list))
     {
-        REPORT ("ENTRY\nFROM: GetLogicalIndex, ind = %d\n", ind);
+        REPORT ("ENTRY\nFROM: GetLogicalIndex, ind = %lu\n", ind);
         return GET_LOGICAL_PTR_ERR;
     }   
 
-    if (!CheckCorrectIndex (list, ind) && 
-         list->data[ind].prev != Identifier_free_node)
-    {
-        return PROCESS_ERROR (GET_LOGICAL_PTR_ERR, "Incorrect ind = %d\n", ind);
-    }
+    #endif
 
-    if (ind > list->size_data)
-        return PROCESS_ERROR (GET_LOGICAL_PTR_ERR, "Number of elements of the requested index.\nind = %d\n", ind);
-       
-
+    if (ind > list->size_data || ind == Invalid_ind)
+        return PROCESS_ERROR (GET_LOGICAL_PTR_ERR, "Number of elements of the requested index.\nind = %lu\n", ind);
 
     if (list->is_linearized)
     {
@@ -550,8 +597,8 @@ int GetLogicalIndex (const List *list, const int ind)
 
     else
     {   
-        int logical_ind = list->head_ptr;
-        int counter = 1;
+        size_t logical_ind = list->head_ptr;
+        size_t counter = 1;
 
         while (counter < ind)
         {
@@ -568,9 +615,11 @@ int GetLogicalIndex (const List *list, const int ind)
 
 //======================================================================================
 
-elem_t ListGetVal (const List *list, const int ind)
+elem_t ListGetVal (const List *list, const size_t ind)
 {
     assert (list != nullptr && "list is nullptr");
+
+    #ifdef CHECK_LIST 
 
     if (ListCheck (list))
     {
@@ -578,9 +627,11 @@ elem_t ListGetVal (const List *list, const int ind)
         return Poison_val; 
     }
 
-    if (!CheckCorrectIndex (list, ind))
+    #endif
+
+    if (ind > list->size_data || ind == Invalid_ind)
     {
-        PROCESS_ERROR (GET_VAL_ERR, "Incorrect ind = %d\n", ind);
+        PROCESS_ERROR (GET_VAL_ERR, "Incorrect ind = %lu\n", ind);
         return Poison_val;
     }
 
@@ -591,48 +642,100 @@ elem_t ListGetVal (const List *list, const int ind)
 
 //======================================================================================
 
-int ListChangeVal (const List *list, const int ind, const elem_t val)
+size_t ListFindVal (const List *list, const elem_t val)
 {
     assert (list != nullptr && "list is nullptr");
+
+    #ifdef CHECK_LIST 
+
+    if (ListCheck (list))
+    {
+        PROCESS_ERROR (GET_VAL_ERR, "Incorrect ind = %lu\n", ind);
+        return nullptr; 
+    }
+
+    #endif
+
+    size_t size = list->size_data;
+
+    size_t cur_ind = list->head_ptr;
+    
+    elem_t cur_val = Dummy_element;
+
+    while (size--)
+    {
+        cur_val = list->data[cur_ind].val;
+        if (cur_val->len == val->len)
+        {
+            if (!strncmp(cur_val->str, val->str, val->len))                                //::OPTIMIZE
+            {
+                return cur_ind;
+            }
+        }
+
+        cur_ind = list->data[cur_ind].next;
+    }
+
+    //No list re-validation as list items don't change
+
+    return Invalid_ind;
+}
+
+//======================================================================================
+
+int ListChangeVal (const List *list, const size_t ind, const elem_t val)
+{
+    assert (list != nullptr && "list is nullptr");
+
+    #ifdef CHECK_LIST 
 
     if (ListCheck (list))
     {
         REPORT ("ENTRY\nFROM: ListChangeVal,"
-                       " ind = %d, val = %d\n", ind, val);
+                       " ind = %lu\n", ind);
         return LIST_GET_VAL_ERR; 
     } 
 
+    #endif
+
     if (!CheckCorrectIndex (list, ind))
     {
-        LOG_REPORT ("Incorrect ind = %d\n", ind);
+        LOG_REPORT ("Incorrect ind = %lu\n", ind);
         return LIST_GET_VAL_ERR;
     }
 
     list->data[ind].val = val;
 
+    #ifdef CHECK_LIST 
+
     if (ListCheck (list))
     {
         REPORT ("EXIT\nFROM: ListChangeVal,"
-                       " ind = %d, val = %d\n", ind, val);
+                       " ind = %lu\n", ind);
         return LIST_GET_VAL_ERR; 
     }
+
+    #endif
 
     return 0;
 }
 
 //======================================================================================
 
-inline static int CheckCorrectIndex (const List *list, const int ind)
+inline static size_t CheckCorrectIndex (const List *list, const size_t ind)
 {
     assert (list != nullptr && "list is nullptr");
 
+    #ifdef CHECK_LIST 
+
     if (ListCheck (list))
     {
-        REPORT ("ENTRY\nFROM: CheckCorrectIndex, ind = %d", ind);
+        REPORT ("ENTRY\nFROM: CheckCorrectIndex, ind = %lu", ind);
         return CHECK_IND_ERR; 
     }
 
-    if (ind < 0) return 0;
+    #endif
+
 
     if (ind == Invalid_ind) return 0;
 
@@ -655,22 +758,20 @@ static int NotFreeNodeValidity (const List *list)
     if (CheckNullptr (list->data))
         return 1;
 
-    int logical_ind = Dummy_element;
-    int counter = 0;
+    size_t logical_ind = Invalid_ind;
+    size_t counter = 0;
         
     while (counter <= list->size_data)
     {
-        if (logical_ind < 0) return 1;
-
         if (list->data[logical_ind].prev == Identifier_free_node) return 1;
 
-        if (logical_ind != Dummy_element && list->data[logical_ind].val == Poison_val) return 1;
+        if (logical_ind != Invalid_ind && list->data[logical_ind].val == Poison_val) return 1;
         
         logical_ind = list->data[logical_ind].next;
         counter++;            
     }
 
-    if (logical_ind != Dummy_element) return 1;
+    if (logical_ind != Invalid_ind) return 1;
 
     return 0;
 }
@@ -684,13 +785,11 @@ static int FreeNodeValidity (const List *list)
     if (CheckNullptr (list->data))
         return 1;
 
-    int logical_ind = list->free_ptr;
-    int counter = 1;
+    size_t logical_ind = list->free_ptr;
+    size_t counter = 1;
         
     while (counter <= list->cnt_free_nodes)
-    {
-        if (logical_ind < 0) return 1;
-        
+    {   
         if (list->data[logical_ind].prev != Identifier_free_node) return 1;
 
         if (list->data[logical_ind].val != Poison_val) return 1;
@@ -710,7 +809,7 @@ int ListDump_ (const List *list,
 {
     assert (list != nullptr && "list is nullptr\n");
 
-    uint64_t err = ListCheck_ (list);
+    uint64_t err = ListCheck (list);
 
     FILE *fp_logs = GetLogFilePtr ();
 
@@ -736,7 +835,6 @@ int ListDump_ (const List *list,
 
     DrawListVariable (list, fp_logs);
 
-    PrintListErrors (err, fp_logs);
 
     #ifdef GRAPH_DUMP
 
@@ -750,20 +848,20 @@ int ListDump_ (const List *list,
     
     #else
 
-        for (int it = 0; it <= list->capacity; it++)
-            fprintf (fp_logs, "%5d", it);
+        for (size_t it = 0; it <= list->capacity; it++)
+            fprintf (fp_logs, "%5lu", it);
         fprintf (fp_logs, "\n");
         
         // for (int it = 0; it <= list->capacity; it++)
         //     fprintf (fp_logs, "%5d", list->data[it].val);
         // fprintf (fp_logs, "\n");
         
-        for (int it = 0; it <= list->capacity; it++)
-            fprintf (fp_logs, "%5d", list->data[it].next);
+        for (size_t it = 0; it <= list->capacity; it++)
+            fprintf (fp_logs, "%5lu", list->data[it].next);
         fprintf (fp_logs, "\n");
 
-        for (int it = 0; it <= list->capacity; it++)
-            fprintf (fp_logs, "%5d", list->data[it].prev);
+        for (size_t it = 0; it <= list->capacity; it++)
+            fprintf (fp_logs, "%5lu", list->data[it].prev);
         fprintf (fp_logs, "\n");
     
     #endif
@@ -788,13 +886,13 @@ static void DrawListVariable (const List *list, FILE *fpout)
     
     fprintf (fpout, "<tr><td> data pointer </td> <td> %p </td></tr>", (char*) list->data);
 
-    fprintf (fpout, "<tr><td> size data </td> <td>  %ld </td></tr>",  list->size_data);
-    fprintf (fpout, "<tr><td> capacity </td> <td> %ld </td></tr>",    list->capacity);
-    fprintf (fpout, "<tr><td>cnt free nodes</td><td> %ld </td></tr>", list->cnt_free_nodes);
+    fprintf (fpout, "<tr><td> size data </td> <td>  %lu </td></tr>",  list->size_data);
+    fprintf (fpout, "<tr><td> capacity </td> <td> %lu </td></tr>",    list->capacity);
+    fprintf (fpout, "<tr><td>cnt free nodes</td><td> %lu </td></tr>", list->cnt_free_nodes);
 
-    fprintf (fpout, "<tr><td> head pointer </td> <td>  %d </td></tr>",  list->head_ptr);
-    fprintf (fpout, "<tr><td> tail pointer </td> <td>  %d </td></tr>",  list->tail_ptr);
-    fprintf (fpout, "<tr><td> free pointer </td> <td>  %d </td></tr>",  list->free_ptr);
+    fprintf (fpout, "<tr><td> head pointer </td> <td>  %lu </td></tr>",  list->head_ptr);
+    fprintf (fpout, "<tr><td> tail pointer </td> <td>  %lu </td></tr>",  list->tail_ptr);
+    fprintf (fpout, "<tr><td> free pointer </td> <td>  %lu </td></tr>",  list->free_ptr);
 
     fprintf (fpout, "<tr><td> is_linearized </td> <td>  %d </td></tr>",  list->is_linearized);
 
@@ -809,12 +907,6 @@ static void DrawListVariable (const List *list, FILE *fpout)
 static void PrintListErrors (uint64_t err, FILE *fpout)
 {
     assert (fpout != nullptr && "fpout is nullptr\n");
-
-    if (err & NEGATIVE_SIZE)
-        fprintf (fpout, "Size_data is negative number\n");
-
-    if (err & NEGATIVE_CAPACITY)
-        fprintf (fpout, "Capacity is negative number\n");
 
     if (err & CAPACITY_LOWER_SIZE)
         fprintf (fpout, "Capacity is lower than size_data\n");
@@ -868,51 +960,50 @@ static int ListDrawLogicalGraph (const List *list)
     
     fprintf (graph, "{rank=min;\n");
 
-        if (list->head_ptr >= 0)
+        if (list->head_ptr != Identifier_free_node)
             fprintf (graph, "node_head [shape = circle, style=filled, color=coral, label=\"HEAD\"];\n");
 
-
-        if (list->tail_ptr >= 0)
+        if (list->tail_ptr != Identifier_free_node)
             fprintf (graph, "node_tail [shape = circle, style=filled, color=lightgreen, label=\"TAIL\"];\n");
         
-        if (list->free_ptr >= 0)
+        if (list->free_ptr != Identifier_free_node)
             fprintf (graph, "node_free [shape = circle, style=filled, color=plum1, label=\"FREE\"];\n");
 
     fprintf (graph, "}\n");
 
-    fprintf (graph, "node_head -> node%d\n", list->head_ptr);
-    fprintf (graph, "node_tail -> node%d\n", list->tail_ptr);
-    fprintf (graph, "node_free -> node%d\n", list->free_ptr);
+    fprintf (graph, "node_head -> node%lu\n", list->head_ptr);
+    fprintf (graph, "node_tail -> node%lu\n", list->tail_ptr);
+    fprintf (graph, "node_free -> node%lu\n", list->free_ptr);
 
 
 
-    static int Cnt_graphs = 0;      //<-To display the current list view
+    static size_t Cnt_graphs = 0;      //<-To display the current list view
 
     fprintf (graph, "{rank =  same;\n");
 
-    for (int counter = 0; counter <= list->capacity; counter++) 
+    for (size_t it = 0; it <= list->capacity; it++) 
     {
-        int next = list->data[counter].next;
-        int prev = list->data[counter].prev;
+        size_t next = list->data[it].next;
+        size_t prev = list->data[it].prev;
 
-        // fprintf (graph, "node%d [style=filled, shape = record, label =  \"{NODE %d | VAL: %d| prev: %d | next: %d}}\",", 
-        //                 counter, counter, list->data[counter].val, prev, next);
+        // fprintf (graph, "node%d [style=filled, shape = record, label =  \"{NODE %d | VAL: %d| prev: %lu | next: %lu}}\",", 
+        //                 it, it, list->data[it].val, prev, next);
 
-        if (prev != -1)
+        if (prev != Identifier_free_node)
             fprintf (graph, " fillcolor=lightpink ];\n");
         else
             fprintf (graph, " fillcolor=lightskyblue ];\n");
 
-        if (next != -1)
+        if (next != Identifier_free_node)
         {
-            fprintf (graph, "node%d -> node%d[style=filled, fillcolor=yellow];\n", 
-                             counter, next);
+            fprintf (graph, "node%lu -> node%lu[style=filled, fillcolor=yellow];\n", 
+                             it, next);
         }
 
-        if (prev != -1)
+        if (prev != Identifier_free_node)
         {
-            fprintf (graph, "node%d -> node%d[style=filled, fillcolor=green];\n", 
-                             counter, prev);
+            fprintf (graph, "node%lu -> node%lu[style=filled, fillcolor=green];\n", 
+                             it, prev);
         }
 
         fprintf (graph, "\n");
@@ -923,7 +1014,7 @@ static int ListDrawLogicalGraph (const List *list)
     fclose(graph);
 
     char command_buffer[Init_buffer] = {0};
-    sprintf(command_buffer, "dot -Tpng graph_img/graph.txt -o graph_img/picture_logical%d.png", Cnt_graphs);
+    sprintf(command_buffer, "dot -Tpng graph_img/graph.txt -o graph_img/picture_logical%lu.png", Cnt_graphs);
 
     if (system(command_buffer))
         return PROCESS_ERROR(LIST_DRAW_GRAPH_ERR, "draw list by graphviz failed\n");
@@ -933,7 +1024,7 @@ static int ListDrawLogicalGraph (const List *list)
     if (CheckNullptr (fp_logs))
         return PROCESS_ERROR(LIST_DRAW_GRAPH_ERR, "logs file pointer is nullptr\n");
 
-    fprintf (fp_logs, "<img src= graph_img/picture_logical%d.png />\n", Cnt_graphs);
+    fprintf (fp_logs, "<img src= graph_img/picture_logical%lu.png />\n", Cnt_graphs);
                                 
     Cnt_graphs++;
     return 0;
@@ -941,128 +1032,23 @@ static int ListDrawLogicalGraph (const List *list)
 
 //======================================================================================
 
-static int ListDrawPhysicalGraph (const List *list)
-{
-    assert (list != nullptr && "list is nullptr\n");
-
-    FILE *graph = OpenFilePtr ("graph_img/graph.txt", "w");
-    if (CheckNullptr (graph))
-        return PROCESS_ERROR(LIST_DRAW_GRAPH_ERR, "draw list by graphviz failed\n");
-
-    fprintf (graph, "digraph G{\n");
-    fprintf (graph, "ranksep = 1.2;\n");
-    fprintf (graph, "splines=ortho;\n");
-    fprintf (graph, "{\n");
-
-    
-    fprintf (graph, "{rank=min;\n");
-
-        if (list->head_ptr >= 0)
-            fprintf (graph, "node_head [shape = circle, style=filled, color=coral, label=\"HEAD\"];\n");
-
-
-        if (list->tail_ptr >= 0)
-            fprintf (graph, "node_tail [shape = circle, style=filled, color=lightgreen, label=\"TAIL\"];\n");
-        
-        if (list->free_ptr >= 0)
-            fprintf (graph, "node_free [shape = circle, style=filled, color=plum1, label=\"FREE\"];\n");
-
-    fprintf (graph, "}\n");
-
-    fprintf (graph, "node_head -> node%d\n", list->head_ptr);
-    fprintf (graph, "node_tail -> node%d\n", list->tail_ptr);
-    fprintf (graph, "node_free -> node%d\n", list->free_ptr);
-
-
-
-    static int Cnt_graphs = 0;      //<-To display the current list view
-
-    fprintf (graph, "{rank =  same;\n");
-
-    for (int counter = 0; counter <= list->capacity; counter++) 
-    {
-        int next = list->data[counter].next;
-        int prev = list->data[counter].prev;
-
-        // fprintf (graph, "node%d [style=filled, shape = record, label =  \"{NODE %d | VAL: %d| prev: %d | next: %d}}\",", 
-        //                 counter, counter, list->data[counter].val, prev, next);
-
-        if (prev != -1)
-            fprintf (graph, " fillcolor=lightpink ];\n");
-        else
-            fprintf (graph, " fillcolor=lightskyblue ];\n");
-
-        if (next != -1)
-        {
-            fprintf (graph, "node%d -> node%d[style=filled, fillcolor=yellow, weight = 0];\n", 
-                             counter, next);
-        }
-
-        if (prev != -1)
-        {
-            fprintf (graph, "node%d -> node%d[style=filled, fillcolor=green, weight = 0];\n", 
-                             counter, prev);
-        }
-
-        fprintf (graph, "\n");
-    
-        if (counter != list->capacity)
-        {
-              fprintf (graph, "node%d -> node%d[style = invis, weight = 10000];\n", 
-                             counter, counter + 1);
-        }
-
-        fprintf (graph, "\n"); 
-    }
-
-
-    fprintf(graph, "}\n}\n}\n");
-    fclose(graph);
-
-    char command_buffer[Init_buffer] = {0};
-    sprintf(command_buffer, "dot -Tpng graph_img/graph.txt -o graph_img/picture_physical%d.png", Cnt_graphs);
-
-    if (system(command_buffer))
-        return PROCESS_ERROR(LIST_DRAW_GRAPH_ERR, "draw list by graphviz failed\n");
- 
-
-    FILE *fp_logs = GetLogFilePtr ();
-    if (CheckNullptr (fp_logs))
-        return PROCESS_ERROR(LIST_DRAW_GRAPH_ERR, "logs file pointer is nullptr\n");
-
-    fprintf (fp_logs, "<img src= graph_img/picture_physical%d.png />\n", Cnt_graphs);
-                                
-    Cnt_graphs++;
-    return 0;
-}
-
-//======================================================================================
-
-static uint64_t ListCheck_ (const List *list)
+static uint64_t ListCheck (const List *list)
 {
     assert (list != nullptr && "list is nullptr");
 
     uint64_t err = 0;
-
-    if (list->size_data < 0) err |= NEGATIVE_SIZE;
-    if (list->capacity  < 0) err |= NEGATIVE_CAPACITY;
-
 
     if (list->capacity  < list->size_data)    err |= CAPACITY_LOWER_SIZE;
 
     if (CheckNullptr (list->data))           err |= DATA_IS_NULLPTR;
 
     if (list->head_ptr == Poison_ptr                     ||
-        list->head_ptr < 0                               ||  
-        list->data[list->tail_ptr].next != Dummy_element   ) err |= ILLIQUID_HEAD_PTR;
+        list->data[list->tail_ptr].next != Invalid_ind   ) err |= ILLIQUID_HEAD_PTR;
 
     if (list->tail_ptr == Poison_ptr                     ||
-        list->tail_ptr < 0                               ||  
-        list->data[list->tail_ptr].next != Dummy_element   ) err |= ILLIQUID_TAIL_PTR;
+        list->data[list->tail_ptr].next != Invalid_ind   ) err |= ILLIQUID_TAIL_PTR;
 
-    if (list->free_ptr <  0             || 
-        list->free_ptr > list->capacity ||  
-        list->free_ptr == Poison_ptr      ) err |= ILLIQUID_FREE_PTR;
+    if (list->free_ptr == Poison_ptr) err |= ILLIQUID_FREE_PTR;
 
     if ((list->is_linearized != 0) && (list->is_linearized != 1)) err |= INCORRECT_LINEARIZED; 
 

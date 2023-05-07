@@ -1,7 +1,7 @@
 #include "../src/word_reader/word_reader.h"
 #include "../src/hash_table/hash_table.h"
 
-#include "../src/hash_table/hash_functions.h"
+//#include "../src/hash_table/hash_functions.h"
 
 #include "test_hash_table.h"
 
@@ -9,12 +9,15 @@
 
 //============================================================================================
 
-
-static int          TestDistribution    (FILE *fpout, const Text *text);
+static int          TestDistribution    (const Text *text);
 
 static int          TestFind            (const Text *text);
 
-inline static int   LoadData            (Hash_table *hash_table, const Text *text);
+static void         StartFind           (Hash_table *hash_table, const Text *text);
+
+inline static void  LoadData            (Hash_table *hash_table, const Text *text);
+
+//============================================================================================
 
 int ExeTest (const char *input_file_name)
 {
@@ -29,17 +32,9 @@ int ExeTest (const char *input_file_name)
     if (GetText(&text, input_file_name))
         return PROCESS_ERROR(EXECUTE_TEST_ERR, "file: \'%s\' read failed, no tests run\n", input_file_name);
 
-
     #ifdef TEST_DISTRIBUTION
 
-    FILE *fpout = OpenFilePtr(Name_result_file, "w");
-    if (CheckNullptr(fpout))
-        PROCESS_ERROR(EXECUTE_TEST_ERR, "open file: \'%s\' to wite failed\n.", Name_result_file);
-
-    TestDistribution(fpout, &text);
-
-    if (CloseFilePtr(fpout))
-        PROCESS_ERROR(EXECUTE_TEST_ERR, "|%p| failed", (char*)fpout);
+    TestDistribution(&text);
 
     #endif
 
@@ -49,7 +44,6 @@ int ExeTest (const char *input_file_name)
 
     #endif
 
-
     if (TextDtor(&text))
         return PROCESS_ERROR(EXECUTE_TEST_ERR, "TextDtor failed\n");
 
@@ -58,10 +52,13 @@ int ExeTest (const char *input_file_name)
 
 //======================================================================================================
 
-static int TestDistribution(FILE *fpout, const Text *text)
+static int TestDistribution(const Text *text)
 {
-    assert(fpout != nullptr && "fpout is nullptr");
     assert(text  != nullptr && "text is nullptr");
+
+    FILE *fpout = OpenFilePtr(Name_result_file, "w");
+    if (CheckNullptr(fpout))
+        PROCESS_ERROR(EXECUTE_TEST_ERR, "open file: \'%s\' to wite failed\n.", Name_result_file);
 
     for (size_t hash_func_num = 0; hash_func_num < Count_hash_func; hash_func_num++)
     {
@@ -75,17 +72,19 @@ static int TestDistribution(FILE *fpout, const Text *text)
 
         for (size_t it = 0; it < hash_table.capacity; it += Step_print)
         {
-            fprintf(fpout, "%ld", hash_table.containers[it].size_data);
+            fprintf(fpout, "%lu", hash_table.buckets[it].size_data);
             if(it + Step_print < Hash_table_capacity)
                 fprintf(fpout, "%c ", Separate_symbol);
         }
-
 
         if (HashTableDtor(&hash_table))
             return PROCESS_ERROR(DISTRIBUTION_TEST_ERR, "HashTableDtor failed.\n");
         
         fprintf(fpout, "\n\n");
     }
+
+    if (CloseFilePtr(fpout))
+        PROCESS_ERROR(EXECUTE_TEST_ERR, "|%p| failed", (char*)fpout);
 
     return 0;
 }
@@ -102,24 +101,41 @@ static int TestFind(const Text *text)
 
     LoadData(&hash_table, text);
 
-    srand(time(NULL));
+    Text test_text = {};
+    
+    if (TextCtor(&test_text))
+        return PROCESS_ERROR(EXECUTE_TEST_ERR, "TextCtor failed\n");
 
-    for (size_t it = 0; it < Count_query; it++)
-    {
-        size_t find_ind = rand() % text->word_cnt;
-        long ind = HashTableFind(&hash_table, &(text->words[find_ind]));
-    }
+    if (GetText(&test_text, Test_input_file))
+        return PROCESS_ERROR(EXECUTE_TEST_ERR, "file: \'%s\' read failed, no tests run\n", Test_input_file);
+
+    StartFind(&hash_table, &test_text);
+
+    if (TextDtor(&test_text))
+        return PROCESS_ERROR(EXECUTE_TEST_ERR, "TextDtor failed\n");
 
     if (HashTableDtor(&hash_table))
         return PROCESS_ERROR(DISTRIBUTION_TEST_ERR, "HashTableDtor failed.\n");
-        
 
     return 0;
 }
 
+static void StartFind(Hash_table *hash_table, const Text *text)
+{
+    assert(hash_table != nullptr && "hash table is nullptr");
+    assert(text != nullptr && "text is nullptr");
+
+    for (size_t it = 0; it < Count_query; it++)
+    {
+        size_t ind = HashTableFind(hash_table, &(text->words[it]));
+    } 
+    
+    return;
+}
+
 //======================================================================================================
 
-inline static int LoadData(Hash_table *hash_table, const Text *text)
+inline static void LoadData(Hash_table *hash_table, const Text *text)
 {
     assert(hash_table != nullptr && "hash table is nullptr");
     assert(text != nullptr && "text is nullptr");
@@ -129,7 +145,7 @@ inline static int LoadData(Hash_table *hash_table, const Text *text)
         HashTableInsert(hash_table, text->words + it);
     }
 
-    return 0;
+    return;
 } 
 
 //======================================================================================================
