@@ -106,8 +106,6 @@ static int ParseText(Text *text_str)
     if (CheckNullptr(text_str->words))
         return PROCESS_ERROR(PARSE_TEXT_ERR, "memory allocation for array of words failed\n");
 
-    char *aligned_buffer = (char*)CreateAlignedBuffer(32, (text_str->word_cnt + 1) * 32);
-
     size_t char_it = 0;
     size_t word_it = 0;
 
@@ -117,25 +115,20 @@ static int ParseText(Text *text_str)
     {
         if (isalpha(text_str->buffer[char_it]))
         {
-            size_t aligned_it = word_it * 32;
+            size_t start_pos = char_it;
             while (char_it < file_size && isalpha(text_str->buffer[char_it]))
             {
-                aligned_buffer[aligned_it] = text_str->buffer[char_it];
-                aligned_it++;
                 char_it++;
             }
 
-            text_str->words[word_it].str = (aligned_buffer + word_it * 32);
-            text_str->words[word_it].len = aligned_it - (word_it * 32); 
+            text_str->words[word_it].str = (text_str->buffer + start_pos);
+            text_str->words[word_it].len = char_it - start_pos; 
 
             word_it++;  
         }
         
         char_it++;
     }
-
-    free(text_str->buffer);
-    text_str->buffer = aligned_buffer;
     
     return 0;
 }
