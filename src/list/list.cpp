@@ -667,10 +667,37 @@ size_t ListFindVal (const List *list, const elem_t val)
         cur_val = list->data[cur_ind].val;
         if (cur_val->len == val->len)
         {
-            if (FastStrncmp(cur_val->str, val->str, val->len))                                //::OPTIMIZE
+            #ifdef OPTIMIZE_FIND_VER
+            
+            int cmp = 1;
+            for (size_t it = 0; it < val->len; it += 32)
+            {
+                __m256i str1_ = _mm256_load_si256((__m256i*) (val->str + it));
+                __m256i str2_ = _mm256_load_si256((__m256i*) (cur_val->str + it));
+
+                __m256i cmp_ = _mm256_cmpeq_epi8(str1_, str2_);
+
+                size_t mask = _mm256_movemask_epi8(cmp_);
+
+                if (~mask){
+                    cmp = 0;
+                    break;
+                }
+            }
+
+            if (cmp)
             {
                 return cur_ind;
             }
+
+            #else
+
+            if (!strncmp(cur_val->str, val->str, val->len))                                //::OPTIMIZE
+            {
+                return cur_ind;
+            }
+
+            #endif
         }
 
         cur_ind = list->data[cur_ind].next;
@@ -680,32 +707,6 @@ size_t ListFindVal (const List *list, const elem_t val)
 
     return Invalid_ind;
 }
-
-//======================================================================================
-
-// elem_t ASMListGetVal (const List *list, const size_t ind)
-// {
-//     assert (list != nullptr && "list is nullptr");
-
-//     if (ind > list->size_data || ind == Invalid_ind)
-//     {
-//         PROCESS_ERROR (GET_VAL_ERR, "Incorrect ind = %lu\n", ind);
-//         return Poison_val;
-//     }
-//     elem_t val = nullptr;
-//     __asm__ (
-//         ".intel_syntax noprefix\n\t"
-//         "movsx   rsi, %1\n\t"
-//         "sal     rsi, 4\n\t"
-//         "add     rsi, qword ptr [%2+24]\n\t"
-//         "mov     %0,  qword ptr [rsi]\n\t"
-
-//         : "=r"(val)
-//         : "r"(ind), "r"(list)
-//     );
-
-//     return val;
-// }
 
 //======================================================================================
 

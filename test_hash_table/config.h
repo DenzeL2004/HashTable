@@ -7,7 +7,7 @@ const char *Name_result_file = "temp/result_distribution.csv";
 
 const char *Test_input_file  = "resource/test.txt";
 
-const size_t Hash_table_capacity = 487ul;
+const size_t Hash_table_capacity = 253ul;
 
 const size_t Step_print = 1;
 

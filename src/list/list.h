@@ -145,11 +145,6 @@ int ListLinearize (List *list);
 int ListDump_ (const List *list,
                 const char* file_name, const char* func_name, int line, const char *format, ...);
 
-
-extern "C" int NASMGetLogicalIndex(const List *list, const size_t ind);
-
-//elem_t ASMListGetVal (const List *list, const size_t ind);
-
-extern "C" elem_t NASMListGetVal (const List *list, const size_t ind);
+extern "C" int ListFindValNASM(const List *list, const elem_t val);
 
 #endif  //#endif _LIST_H_

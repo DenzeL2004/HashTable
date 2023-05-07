@@ -6,10 +6,10 @@ FLAGS = -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equa
 		-Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wsign-promo -Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel  	\
 		-Wtype-limits -Wwrite-strings -D_DEBUG -D_EJUDGE_CLIENT_SIDE
 
-OPTIMIZE_FLAG = -O1 -mavx2 -msse4
+OPTIMIZE_FLAG = -O1 -mavx2 -msse4 -masm=intel
 
-run: 	 		 obj/generals.o obj/log_errors.o obj/word_reader.o obj/list.o obj/hash_table.o obj/hash_func.o obj/test.o obj/main.o obj/GetLogicalIndex.o
-	g++ -no-pie  obj/generals.o obj/log_errors.o obj/word_reader.o obj/list.o obj/hash_table.o obj/hash_func.o obj/test.o obj/main.o obj/GetLogicalIndex.o -o run $(OPTIMIZE_FLAG)
+run: 	 		 obj/generals.o obj/log_errors.o obj/word_reader.o obj/list.o obj/hash_table.o obj/hash_func.o obj/test.o obj/main.o obj/ListFindNASM.o
+	g++ -no-pie  obj/generals.o obj/log_errors.o obj/word_reader.o obj/list.o obj/hash_table.o obj/hash_func.o obj/test.o obj/main.o obj/ListFindNASM.o -o run $(OPTIMIZE_FLAG)
 
 
 obj/main.o: main.cpp
@@ -31,7 +31,7 @@ obj/generals.o: src/generals_func/generals.cpp src/generals_func/generals.h
 
 
 obj/list.o: src/list/list.cpp src/list/list.h src/list/config_list.h
-		g++ src/list/list.cpp -c -masm=intel  -o obj/list.o $(OPTIMIZE_FLAG) $(FLAGS)
+		g++ src/list/list.cpp -c -masm=intel -o obj/list.o $(OPTIMIZE_FLAG) $(FLAGS)
 
 
 obj/hash_table.o: src/hash_table/hash_table.cpp src/hash_table/hash_table.h 
@@ -42,8 +42,8 @@ obj/hash_func.o: src/hash_table/hash_functions.cpp src/hash_table/hash_functions
 
 
 
-obj/GetLogicalIndex.o:	  src/list/GetLogicalIndex.s 
-			nasm -f elf64 src/list/GetLogicalIndex.s -o obj/GetLogicalIndex.o
+obj/ListFindNASM.o:	  src/list/ListFindNASM.s 
+			nasm -f elf64 src/list/ListFindNASM.s -o obj/ListFindNASM.o 
 
 
 

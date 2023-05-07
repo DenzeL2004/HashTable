@@ -303,7 +303,6 @@ char *CreateAlignedBuffer(const size_t alignment, const size_t size)
 	return buffer;
 }
 
-//TODO: unusing len
 //========================================================================================
 
 int FastStrncmp(const char *str1, const char *str2, const size_t len)
@@ -311,14 +310,20 @@ int FastStrncmp(const char *str1, const char *str2, const size_t len)
 	assert(str1 != nullptr && "src is nullptr");
 	assert(str2 != nullptr && "src is nullptr");
 
-	__m256i str1_ = _mm256_load_si256((__m256i*) str1);
-	__m256i str2_ = _mm256_load_si256((__m256i*) str2);
+	for (size_t it = 0; it < len; it += 32)
+	{
 
-	__m256i cmp_ = _mm256_cmpeq_epi8(str1_, str2_);
+		__m256i str1_ = _mm256_load_si256((__m256i*) (str1 + it));
+		__m256i str2_ = _mm256_load_si256((__m256i*) (str2 + it));
 
-	size_t mask = _mm256_movemask_epi8(cmp_);
+		__m256i cmp_ = _mm256_cmpeq_epi8(str1_, str2_);
 
-	return ((~mask) == 0);
+		size_t mask = _mm256_movemask_epi8(cmp_);
+
+		if (~mask) return 0;
+	}
+
+	return 1;
 }
 
-//========================================================================================
+//========================================================================================YWORD

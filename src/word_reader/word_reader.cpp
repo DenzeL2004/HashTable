@@ -12,6 +12,12 @@ static int      ParseText       (Text *text_str);
 static size_t   GetCountWord    (Text *text_str);
 
 
+static char     IsAlphaNASM     (const char letter);
+
+
+static inline int IsAlpha       (const char letter);
+
+
 //====================================================================================================
 
 int GetText(Text *text_str, const char *file_name)
@@ -123,10 +129,10 @@ static int ParseText(Text *text_str)
 
     while (char_it < file_size)
     {
-        if (isalpha(text_str->buffer[char_it]))
+        if (IsAlphaNASM(text_str->buffer[char_it]))
         {
             size_t aligned_it = word_it * 32;
-            while (char_it < file_size && isalpha(text_str->buffer[char_it]))
+            while (char_it < file_size && IsAlphaNASM(text_str->buffer[char_it]))
             {
                 aligned_buffer[aligned_it] = text_str->buffer[char_it];
                 aligned_it++;
@@ -163,16 +169,13 @@ static size_t GetCountWord(Text *text_str)
 
     while (char_it < file_siz)
     {
-        if (isalpha(text_str->buffer[char_it]))
+        if (IsAlphaNASM(text_str->buffer[char_it]))
         {
             word_cnt++;
-            while (char_it < file_siz && isalpha(text_str->buffer[char_it]))
+            while (char_it < file_siz && IsAlphaNASM(text_str->buffer[char_it]))
             {
                 char_it++;
             }
-
-            // if (char_it < file_siz)
-            //     text_str->buffer[char_it] = '\0';   
         }
         
         char_it++;
@@ -182,3 +185,27 @@ static size_t GetCountWord(Text *text_str)
 }
 
 //====================================================================================================
+
+static char IsAlphaNASM(const char letter)
+{
+    char ans = 0;
+    __asm__ (
+        ".intel_syntax noprefix\n\t"
+        "and     %1, -33\n\t"
+        "sub     %1, 65\n\t"
+        "cmp     %1, 25\n\t"
+        "setbe   %0\n\t"
+        
+        : "=r"(ans)
+        : "r"(letter)
+    );
+
+    return ans;
+}
+
+static inline int IsAlpha(const char letter)
+{
+    return ((letter >= 'a') && (letter <= 'z')) || ((letter >= 'A') && (letter <= 'Z'));
+}
+
+

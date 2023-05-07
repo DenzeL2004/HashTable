@@ -51,6 +51,9 @@ int HashTableInsert(Hash_table *hash_table, const elem_t val)
 {
     assert(hash_table != nullptr && "hash table ptr is nullptr");
 
+    if (HashTableFind(hash_table, val) != Invalid_ind)
+        return 0;
+
     uint32_t hash =  (uint32_t)((*(hash_table->hash_func))(val->str, val->len) % hash_table->capacity);
 
     ListInsertBack(hash_table->buckets + hash, val);
@@ -68,10 +71,6 @@ size_t HashTableFind(Hash_table *hash_table, const elem_t val)
 
     return ListFindVal(&hash_table->buckets[hash], val);
 }
-
-//TODO inline:
-//измерить по каждой функции по отдельности
-//время по конкретному фремени
 
 //=========================================================================
 
