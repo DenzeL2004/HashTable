@@ -127,10 +127,7 @@ static void StartFind(Hash_table *hash_table, const Text *text)
 
     for (size_t it = 0; it < Count_query; it++)
     {
-        size_t ind = HashTableFind(hash_table, &(text->words[it]));
-
-        hash_t hash = hash_table->hash_func(text->words[it].str, text->words[it].len) % hash_table->capacity;
-        printf ("!!%s %s\n", text->words[it].str, hash_table->buckets[hash].data[ind].val->str);   
+        size_t ind = HashTableFind(hash_table, &(text->words[it]));  
     }
 
     return;
