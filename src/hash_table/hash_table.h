@@ -27,17 +27,15 @@ enum Hash_table_err
 
 //=======================================================================================
 
-int     HashTableCtor       (Hash_table *hash_table, size_t capacity, hash_func_t hash_func);
+int         HashTableCtor       (Hash_table *hash_table, size_t capacity, hash_func_t hash_func);
+    
+int         HashTableDtor       (Hash_table *hash_table);
+    
+int         HashTableInsert     (Hash_table *hash_table, const hash_key_t key, const elem_t val);
+    
+int         HashTableErase      (Hash_table *hash_table, const hash_key_t key, const elem_t val);
 
-int     HashTableDtor       (Hash_table *hash_table);
-
-int     HashTableInsert     (Hash_table *hash_table, const elem_t val);
-
-
-size_t    HashTableFind     (Hash_table *hash_table, const elem_t val);
-
-
-int     HashTableErase      (Hash_table *hash_table, const elem_t val);
+size_t      HashTableFind       (Hash_table *hash_table, const hash_key_t key, const elem_t val);
 
 //=======================================================================================
 

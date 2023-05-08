@@ -69,63 +69,64 @@ const uint32_t CRC32Table[256] = {
 
 //=========================================================================
 
-hash_t DumbHash (const char *data, const size_t size)
+hash_t DumbHash (const hash_key_t key)
 {
-    assert(data != nullptr && "data pointer is nullptr");
+    assert(key != nullptr && "key pointer is nullptr");
 
     return 0u;
 }
 
 //=========================================================================
 
-hash_t FirstByteHash (const char *data, const size_t size)
+hash_t FirstByteHash (const hash_key_t key)
 {
-    assert(data != nullptr && "data pointer is nullptr");
+    assert(key != nullptr && "key pointer is nullptr");
 
-    if (size == 0)
-        return 0u;
-    
-    return data[0];
+    return key[0];
 }
 
 
 //=========================================================================
 
-hash_t LenHash(const char *data, const size_t size)
+hash_t LenHash(const hash_key_t key)
 {
-    assert(data != nullptr && "data pointer is nullptr");
+    assert(key != nullptr && "key pointer is nullptr");
 
-    return (hash_t)size;
+    size_t len = 0;
+    while (key[len] != '\0')
+        len++;
+
+    return (hash_t)len;
 }
 
 //=========================================================================
 
-hash_t AsciiSumHash(const char *data, const size_t size)
+hash_t AsciiSumHash(const hash_key_t key)
 {
-    assert(data != nullptr && "data pointer is nullptr");
+    assert(key != nullptr && "key pointer is nullptr");
 
     hash_t hash = 0u;
 
-    for (size_t it = 0; it < size; it++)
-        hash += data[it];
+    for (size_t it = 0; key[it] != '\0'; it++)
+        hash += key[it];
 
     return hash;
 }
 
 //=========================================================================
 
-hash_t RolHash(const char *data, const size_t size)
+hash_t RolHash(const hash_key_t key)
 {
-    assert(data != nullptr && "data pointer is nullptr");
+    assert(key != nullptr && "key pointer is nullptr");
 
     const uint32_t Shift = sizeof(uint32_t) * 8 - 1;
 
     hash_t hash = 0u;
 
-    for (size_t it = 0; it < size; it++)
+    for (size_t it = 0; key[it] != '\0'; it++)
     {
         hash = ((hash << 1) | (hash >> Shift));
-        hash ^= data[it];
+        hash ^= key[it];
 
     }
 
@@ -134,18 +135,18 @@ hash_t RolHash(const char *data, const size_t size)
 
 //=========================================================================
 
-hash_t RorHash(const char *data, const size_t size)
+hash_t RorHash(const hash_key_t key)
 {
-    assert(data != nullptr && "data pointer is nullptr");
+    assert(key != nullptr && "key pointer is nullptr");
 
     const uint32_t Shift = sizeof(uint32_t) * 8 - 1;
 
     hash_t hash = 0u;
 
-    for (size_t it = 0; it < size; it++)
+    for (size_t it = 0; key[it] != '\0'; it++)
     {
         hash = ((hash >> 1) | (hash << Shift));
-        hash ^= data[it];
+        hash ^= key[it];
     }
 
     return hash;
@@ -153,21 +154,20 @@ hash_t RorHash(const char *data, const size_t size)
 
 //=========================================================================
 
-hash_t CRC32Hash(const char *data, const size_t size)
+hash_t CRC32Hash(const hash_key_t key)
 {
-    assert(data != nullptr && "data pointer is nullptr");
+    assert(key != nullptr && "key pointer is nullptr");
 
     const uint32_t Init_val = 0xFFFFFFFFu; 
 
     hash_t hash = Init_val;
 
-    for (size_t it = 0; it < size; it++)
+    for (size_t it = 0; key[it] != '\0'; it++)
     {
-        hash = (hash >> 8) ^ CRC32Table[(hash ^ data[it]) & 0xFF];
+        hash = (hash >> 8) ^ CRC32Table[(hash ^ key[it]) & 0xFF];
     }
 
     return hash ^ Init_val;
 }
 
 //=========================================================================
-

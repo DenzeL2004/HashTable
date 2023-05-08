@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "../word_reader/word_reader.h"
 
-typedef Word *elem_t;
+typedef char *elem_t;
 
 
 const elem_t Poison_val  = nullptr;  //<- In free nodes is written

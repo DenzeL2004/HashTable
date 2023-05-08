@@ -125,11 +125,19 @@ static void StartFind(Hash_table *hash_table, const Text *text)
     assert(hash_table != nullptr && "hash table is nullptr");
     assert(text != nullptr && "text is nullptr");
 
+    // clock_t time_start = clock();
+
     for (size_t it = 0; it < Count_query; it++)
     {
-        size_t ind = HashTableFind(hash_table, &(text->words[it]));
-    } 
-    
+        size_t ind = HashTableFind(hash_table, text->words[it].str, text->words[it].str);
+
+        // hash_t hash = hash_table->hash_func(text->words[it].str) % hash_table->capacity;
+        // printf ("!!%s %s\n", text->words[it].str, hash_table->buckets[hash].data[ind].val);   
+    }
+
+    // clock_t time_finish = clock();
+    // printf ("%.4f ms\n", (double)(1000.0 * (time_finish-time_start)/CLOCKS_PER_SEC));
+
     return;
 }
 
@@ -142,7 +150,8 @@ inline static void LoadData(Hash_table *hash_table, const Text *text)
 
     for (size_t it = 0; it < text->word_cnt; it++)
     {
-        HashTableInsert(hash_table, text->words + it);
+        //printf ("%s\n", text->words[it].str);
+        HashTableInsert(hash_table, text->words[it].str, text->words[it].str);
     }
 
     return;
