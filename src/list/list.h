@@ -11,7 +11,7 @@ const elem_t Dummy_element = nullptr;
 
 struct Node
 {
-    elem_t val = 0;
+    elem_t val  = Dummy_element;
     size_t next = 0;
     size_t prev = 0;
 };

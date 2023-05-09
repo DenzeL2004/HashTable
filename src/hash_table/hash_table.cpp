@@ -47,14 +47,14 @@ int HashTableDtor(Hash_table *hash_table)
 
 //=========================================================================
 
-int HashTableInsert(Hash_table *hash_table, const elem_t val)
+int HashTableInsert(Hash_table *hash_table, const hash_key_t key, const elem_t val)
 {
     assert(hash_table != nullptr && "hash table ptr is nullptr");
 
-    if (HashTableFind(hash_table, val) != Invalid_ind)
+    if (HashTableFind(hash_table, key, val) != Invalid_ind)
         return 0;
 
-    uint32_t hash =  (uint32_t)((*(hash_table->hash_func))(val->str, val->len) % hash_table->capacity);
+    uint32_t hash =  (uint32_t)((*(hash_table->hash_func))(key) % hash_table->capacity);
 
     ListInsertBack(hash_table->buckets + hash, val);
     
@@ -63,11 +63,11 @@ int HashTableInsert(Hash_table *hash_table, const elem_t val)
 
 //=========================================================================
 
-size_t HashTableFind(Hash_table *hash_table, const elem_t val)
+size_t HashTableFind(Hash_table *hash_table, const hash_key_t key, const elem_t val)
 {
     assert(hash_table != nullptr && "hash table ptr is nullptr");
 
-    hash_t hash = (hash_t)((*(hash_table->hash_func))(val->str, val->len) % hash_table->capacity);
+    hash_t hash = (hash_t)((*(hash_table->hash_func))(key) % hash_table->capacity);
 
     return ListFindValNASM(&hash_table->buckets[hash], val);
 }
@@ -75,18 +75,18 @@ size_t HashTableFind(Hash_table *hash_table, const elem_t val)
 //=========================================================================
 
 
-int HashTableErase(Hash_table *hash_table, const elem_t val)
+int HashTableErase(Hash_table *hash_table, const hash_key_t key, const elem_t val)
 {
     assert(hash_table != nullptr && "hash table ptr is nullptr");
 
-    size_t ind = HashTableFind(hash_table, val);
+    size_t ind = HashTableFind(hash_table, key, val);
     if (ind == Invalid_ind)
     {
         LOG_REPORT("No item in table\n");
         return 0;
     }
 
-    uint32_t hash =  (uint32_t)((*(hash_table->hash_func))(val->str, val->len) % hash_table->capacity);
+    uint32_t hash =  (uint32_t)((*(hash_table->hash_func))(key) % hash_table->capacity);
 
     ListErase(&(hash_table->buckets[hash]), ind);
 

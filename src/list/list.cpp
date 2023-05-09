@@ -660,45 +660,32 @@ size_t ListFindVal (const List *list, const elem_t val)
 
     size_t cur_ind = list->head_ptr;
     
-    elem_t cur_val = Dummy_element;
+    elem_t cur_str = Dummy_element;
 
     while (size--)
     {
-        cur_val = list->data[cur_ind].val;
-        if (cur_val->len == val->len)
-        {
+        cur_str = list->data[cur_ind].val;
+        
             #ifdef OPTIMIZE_FIND_VER
             
-            int cmp = 1;
-            for (size_t it = 0; it < val->len; it += 32)
-            {
-                __m256i str1_ = _mm256_load_si256((__m256i*) (val->str + it));
-                __m256i str2_ = _mm256_load_si256((__m256i*) (cur_val->str + it));
+            __m256i str1_ = _mm256_load_si256((__m256i*) (val));
+            __m256i str2_ = _mm256_load_si256((__m256i*) (cur_str));
 
-                __m256i cmp_ = _mm256_cmpeq_epi8(str1_, str2_);
+            __m256i cmp_ = _mm256_cmpeq_epi8(str1_, str2_);
 
-                size_t mask = _mm256_movemask_epi8(cmp_);
+            size_t mask = _mm256_movemask_epi8(cmp_);
 
-                if (~mask){
-                    cmp = 0;
-                    break;
-                }
-            }
-
-            if (cmp)
-            {
-                return cur_ind;
-            }
+            if (~mask == 0) return cur_ind;
+            
 
             #else
 
-            if (!strncmp(cur_val->str, val->str, val->len))                                //::OPTIMIZE
+            if (!strcmp(cur_str, val))                               //::OPTIMIZE
             {
                 return cur_ind;
             }
 
             #endif
-        }
 
         cur_ind = list->data[cur_ind].next;
     }

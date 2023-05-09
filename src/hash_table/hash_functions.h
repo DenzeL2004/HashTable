@@ -6,24 +6,26 @@
 
 typedef uint32_t hash_t;
 
-typedef hash_t (*hash_func_t) (const char*, const size_t);
+typedef char* hash_key_t;
+
+typedef hash_t (*hash_func_t) (const hash_key_t);
 
 
-hash_t      DumbHash        (const char *data, const size_t size);
+hash_t      DumbHash        (const hash_key_t key);
     
-hash_t      FirstByteHash   (const char *data, const size_t size);
+hash_t      FirstByteHash   (const hash_key_t key);
     
-hash_t      LenHash         (const char *data, const size_t size);
+hash_t      LenHash         (const hash_key_t key);
     
-hash_t      AsciiSumHash    (const char *data, const size_t size);
+hash_t      AsciiSumHash    (const hash_key_t key);
     
-hash_t      RolHash         (const char *data, const size_t size);
+hash_t      RolHash         (const hash_key_t key);
     
-hash_t      RorHash         (const char *data, const size_t size);
+hash_t      RorHash         (const hash_key_t key);
 
-hash_t      CRC32Hash       (const char *data, const size_t size);
+hash_t      CRC32Hash       (const hash_key_t key);
     
-hash_t      FastCRC32Hash   (const char *data, const size_t size);
+hash_t      FastCRC32Hash   (const hash_key_t key);
 
 
 #endif

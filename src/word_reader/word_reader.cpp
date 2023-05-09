@@ -129,10 +129,10 @@ static int ParseText(Text *text_str)
 
     while (char_it < file_size)
     {
-        if (IsAlphaNASM(text_str->buffer[char_it]))
+        if (IsAlpha(text_str->buffer[char_it]))
         {
             size_t aligned_it = word_it * 32;
-            while (char_it < file_size && IsAlphaNASM(text_str->buffer[char_it]))
+            while (char_it < file_size && IsAlpha(text_str->buffer[char_it]))
             {
                 aligned_buffer[aligned_it] = text_str->buffer[char_it];
                 aligned_it++;
@@ -169,10 +169,10 @@ static size_t GetCountWord(Text *text_str)
 
     while (char_it < file_siz)
     {
-        if (IsAlphaNASM(text_str->buffer[char_it]))
+        if (IsAlpha(text_str->buffer[char_it]))
         {
             word_cnt++;
-            while (char_it < file_siz && IsAlphaNASM(text_str->buffer[char_it]))
+            while (char_it < file_siz && IsAlpha(text_str->buffer[char_it]))
             {
                 char_it++;
             }

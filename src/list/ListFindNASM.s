@@ -7,43 +7,40 @@ ListFindValNASM:
         test    rdi, rdi                        ;--------------------
         je      .not_find                       ;check list size != 0
         
+ 
         mov     rcx, qword [rdi+8]              ;list size
 
-        mov     rax, qword [rdi+32]             ;list head_ptr
-                       
-        test    rcx, rcx
-        je      .not_find
+        test    rcx, rcx                        ;--------------------
+        je      .not_find                       ;check list size != 0
+
+        mov     rax, qword [rdi+32]             ;list head ptr
         
-        mov     r8, qword [rsi+8]               ;input value len           
-
-        mov     r9, qword [rdi+24]              ;data address
-
         dec     rcx
-        jmp     .begin
+        
+        mov     rdi, qword [rdi+24]             ;list data address
+        vmovdqa ymm1, yword [rsi]               ;set to ymm input str
 
-.next
-        mov     rax, qword [rdx+8]              ;node->next
+        jmp     .check_str
+
+.next_ind:
+
+        mov     rax, qword [rdx+8]              ;ans_ind = list->data[ind].next
+        
         sub     rcx, 1
         jb      .not_find
-.begin
-        lea     rdx, [rax+rax*2]                ;---------------
-        lea     rdx, [r9+rdx*8]                 ;calc index list
 
-        mov     rdi, qword [rdx]                ;address list vallue
+.check_str:
 
-        cmp     qword [rdi+8], r8               ;------------------------------------------------
-        jne     .next                           ;check input val len and current list element len
+        lea     rdx, [rax+rax*2]                ;calc index val
+        lea     rdx, [rdi+rdx*8]                ;--------------
 
-        mov             r10, qword [rdi]        ;first string address
-        mov             rdi, qword [rsi]        ;second string address
+        mov     rbx, qword [rdx]                ;current strinng address
         
-        vmovdqa         ymm0, yword [r10]       
-        vpcmpeqb        ymm0, ymm0, yword [rdi] ;comparee string 
-
-        vpmovmskb       edi, ymm0               ;get mask        
+        vpcmpeqb        ymm0, ymm1, yword [rbx]
+        vpmovmskb       ebx, ymm0
         
-        cmp     edi, -1                 
-        jne     .next                           ;check mask
+        cmp     ebx, -1                         ;compare strings
+        jne     .next_ind
 
         ret
 
