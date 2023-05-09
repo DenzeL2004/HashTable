@@ -125,9 +125,10 @@ static void StartFind(Hash_table *hash_table, const Text *text)
     assert(hash_table != nullptr && "hash table is nullptr");
     assert(text != nullptr && "text is nullptr");
 
+
     for (size_t it = 0; it < Count_query; it++)
     {
-        size_t ind = HashTableFind(hash_table, &(text->words[it]));  
+        size_t ind = HashTableFind(hash_table, text->words[it].str, text->words[it].str);
     }
 
     return;
@@ -142,7 +143,7 @@ inline static void LoadData(Hash_table *hash_table, const Text *text)
 
     for (size_t it = 0; it < text->word_cnt; it++)
     {
-        HashTableInsert(hash_table, text->words + it);
+        HashTableInsert(hash_table, text->words[it].str, text->words[it].str);
     }
 
     return;
