@@ -125,7 +125,7 @@ static void StartFind(Hash_table *hash_table, const Text *text)
     assert(hash_table != nullptr && "hash table is nullptr");
     assert(text != nullptr && "text is nullptr");
 
-    // clock_t time_start = clock();
+    clock_t time_start = clock();
 
     for (size_t it = 0; it < Count_query; it++)
     {
@@ -135,8 +135,8 @@ static void StartFind(Hash_table *hash_table, const Text *text)
         // printf ("!!%s %s\n", text->words[it].str, hash_table->buckets[hash].data[ind].val);   
     }
 
-    // clock_t time_finish = clock();
-    // printf ("%.4f ms\n", (double)(1000.0 * (time_finish-time_start)/CLOCKS_PER_SEC));
+    clock_t time_finish = clock();
+    printf ("%.4f\n", (double)(1000.0 * (time_finish-time_start)/CLOCKS_PER_SEC));
 
     return;
 }

@@ -665,27 +665,12 @@ size_t ListFindVal (const List *list, const elem_t val)
     while (size--)
     {
         cur_str = list->data[cur_ind].val;
-        
-            #ifdef OPTIMIZE_FIND_VER
-            
-            __m256i str1_ = _mm256_load_si256((__m256i*) (val));
-            __m256i str2_ = _mm256_load_si256((__m256i*) (cur_str));
 
-            __m256i cmp_ = _mm256_cmpeq_epi8(str1_, str2_);
+        if (!StrcmpAsm(cur_str, val))                               //::OPTIMIZE
+        {
+            return cur_ind;
+        }
 
-            size_t mask = _mm256_movemask_epi8(cmp_);
-
-            if (~mask == 0) return cur_ind;
-            
-
-            #else
-
-            if (!strcmp(cur_str, val))                               //::OPTIMIZE
-            {
-                return cur_ind;
-            }
-
-            #endif
 
         cur_ind = list->data[cur_ind].next;
     }

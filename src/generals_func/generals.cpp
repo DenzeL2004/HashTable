@@ -302,3 +302,47 @@ char *CreateAlignedBuffer(const size_t alignment, const size_t size)
 	
 	return buffer;
 }
+
+//========================================================================================
+
+int StrcmpAsm (const char *str1, const char *str2)
+{
+	assert (str1 != nullptr && "str is nullptr");
+	assert (str2 != nullptr && "str is nullptr");
+
+	int ans = 0;
+	asm(
+		".intel_syntax noprefix\n\t"
+		
+		"mov r10, %1\n\t"
+        "mov r9, %2\n\t"
+
+		"xor rax, rax\n\t"
+		"xor rdx, rdx\n\t"
+
+        ".loop:\n\t"
+            "mov al, byte ptr [r10]\n\t"
+            "mov dl, byte ptr [r9]\n\t"
+    	    
+			"cmp al, 0\n\t"
+    	    "je .end\n\t"
+			"cmp al, dl\n\t"
+    	    "jne .end\n\t"
+
+    	    "inc r9\n\t"
+    	    "inc r10\n\t"
+    	    
+    	    "jmp .loop\n\t"
+        ".end:\n\t"
+
+    	    "sub rax, rdx\n\t"
+			"mov %0, eax\n\t"
+
+		 :"=r" (ans) 
+		 :"r" (str1), "r" (str2)				
+	);
+
+	return ans;
+}
+
+//========================================================================================

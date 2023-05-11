@@ -182,4 +182,6 @@ int     FreeVirtualBuf      (const int fdin, char *virtual_buf);
 
 char*   CreateAlignedBuffer (const size_t alignment, const size_t size);
 
+int     StrcmpAsm           (const char *str1, const char *str2);
+
 #endif
