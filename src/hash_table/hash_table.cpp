@@ -69,7 +69,7 @@ size_t HashTableFind(Hash_table *hash_table, const hash_key_t key, const elem_t 
 
     hash_t hash = (hash_t)((*(hash_table->hash_func))(key) % hash_table->capacity);
 
-    return ListFindVal(&hash_table->buckets[hash], val);
+    return ListFindValNASM(&hash_table->buckets[hash], val);
 }
 
 //=========================================================================
