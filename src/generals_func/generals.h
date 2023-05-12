@@ -26,6 +26,8 @@
 
 #include <syscall.h>
 
+#include <immintrin.h>
+
 
 #define MIN(a, b) ((a) < (b) ? (а) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -183,5 +185,7 @@ int     FreeVirtualBuf      (const int fdin, char *virtual_buf);
 char*   CreateAlignedBuffer (const size_t alignment, const size_t size);
 
 int     StrcmpAsm           (const char *str1, const char *str2);
+
+int     StrcmpIntrinsic     (const char *str1, const char *str2);
 
 #endif

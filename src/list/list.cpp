@@ -666,7 +666,8 @@ size_t ListFindVal (const List *list, const elem_t val)
     {
         cur_str = list->data[cur_ind].val;
 
-        if (!StrcmpAsm(cur_str, val))                               //::OPTIMIZE
+
+        if (!StrcmpIntrinsic(cur_str, val))                           
         {
             return cur_ind;
         }

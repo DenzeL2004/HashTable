@@ -125,11 +125,23 @@ static void StartFind(Hash_table *hash_table, const Text *text)
     assert(hash_table != nullptr && "hash table is nullptr");
     assert(text != nullptr && "text is nullptr");
 
+    #ifdef PRINT_TIME
+    
+    clock_t time_start = clock();
+
+    #endif
+
     for (size_t it = 0; it < Count_query; it++)
     {
         size_t ind = HashTableFind(hash_table, text->words[it].str, text->words[it].str);
-
     }
+
+    #ifdef PRINT_TIME
+
+    clock_t time_finish = clock();
+    printf ("%.4f\n", (double)(1000.0 * (time_finish-time_start)/CLOCKS_PER_SEC));
+
+    #endif    
 
     return;
 }

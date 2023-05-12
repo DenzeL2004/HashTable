@@ -27,7 +27,7 @@ const size_t Invalid_ind = 0;
 #define ELEM_T_SPEC "p"         //<- specifier character to print elem
 
 
-//#define OPTIMIZE_FIND_VER
+//#define INLINE_STRCMP
 
 
 #endif  //endif _LIST_CONFIG_H_

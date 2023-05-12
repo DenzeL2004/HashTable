@@ -307,8 +307,6 @@ char *CreateAlignedBuffer(const size_t alignment, const size_t size)
 
 int StrcmpAsm (const char *str1, const char *str2)
 {
-	assert (str1 != nullptr && "str is nullptr");
-	assert (str2 != nullptr && "str is nullptr");
 
 	int ans = 0;
 	asm(
@@ -343,6 +341,20 @@ int StrcmpAsm (const char *str1, const char *str2)
 	);
 
 	return ans;
+}
+
+//========================================================================================
+
+int StrcmpIntrinsic(const char *str1, const char *str2)
+{
+	__m256i str1_ = _mm256_load_si256((__m256i*) (str1));
+	__m256i str2_ = _mm256_load_si256((__m256i*) (str2));
+
+	__m256i cmp_ = _mm256_cmpeq_epi8(str1_, str2_);
+
+	size_t mask = _mm256_movemask_epi8(cmp_);
+
+	return (~mask != 0);
 }
 
 //========================================================================================
