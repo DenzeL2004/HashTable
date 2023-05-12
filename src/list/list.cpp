@@ -666,10 +666,10 @@ size_t ListFindVal (const List *list, const elem_t val)
     {
         cur_str = list->data[cur_ind].val;
         
-            if (!strcmp(cur_str, val))                               //::OPTIMIZE
-            {
-                return cur_ind;
-            }
+        if (!strcmp(cur_str, val)) 
+        {
+            return cur_ind;
+        }
 
         cur_ind = list->data[cur_ind].next;
     }
