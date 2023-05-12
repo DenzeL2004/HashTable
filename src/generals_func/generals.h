@@ -26,6 +26,8 @@
 
 #include <syscall.h>
 
+#include <immintrin.h>
+
 
 #define MIN(a, b) ((a) < (b) ? (а) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))

@@ -10,7 +10,6 @@ typedef char* hash_key_t;
 
 typedef hash_t (*hash_func_t) (const hash_key_t);
 
-
 hash_t      DumbHash        (const hash_key_t key);
     
 hash_t      FirstByteHash   (const hash_key_t key);
@@ -24,5 +23,8 @@ hash_t      RolHash         (const hash_key_t key);
 hash_t      RorHash         (const hash_key_t key);
 
 hash_t      CRC32Hash       (const hash_key_t key);
+
+
+hash_t      FastCRC32Hash   (const hash_key_t key);
 
 #endif

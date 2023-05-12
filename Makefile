@@ -6,7 +6,7 @@ FLAGS = -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equa
 		-Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wsign-promo -Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel  	\
 		-Wtype-limits -Wwrite-strings -D_DEBUG -D_EJUDGE_CLIENT_SIDE
 
-OPTIMIZE_FLAG = -O1
+OPTIMIZE_FLAG = -O1 -mavx2 -msse4
 
 run: 	 obj/generals.o obj/log_errors.o obj/word_reader.o obj/list.o obj/hash_table.o obj/hash_func.o obj/test.o obj/main.o
 	g++  obj/generals.o obj/log_errors.o obj/word_reader.o obj/list.o obj/hash_table.o obj/hash_func.o obj/test.o obj/main.o -o run $(OPTIMIZE_FLAG)
