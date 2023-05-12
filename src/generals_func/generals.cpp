@@ -255,7 +255,7 @@ char* CreateVirtualBuf (const int fdin, const int prot, const off_t offset)
 
     if (buf_ptr == MAP_FAILED)
     {
-        fprintf (stderr, "create virtual buffer failed. "
+        fprintf (stderr, "craete virtual buffer failed. "
                           "Buf_ptr = MAP_FAILED.\nDiscriptor: %d\n", fdin);
         return nullptr;
     }
@@ -305,25 +305,56 @@ char *CreateAlignedBuffer(const size_t alignment, const size_t size)
 
 //========================================================================================
 
-int FastStrncmp(const char *str1, const char *str2, const size_t len)
+int StrcmpAsm (const char *str1, const char *str2)
 {
-	assert(str1 != nullptr && "src is nullptr");
-	assert(str2 != nullptr && "src is nullptr");
 
-	for (size_t it = 0; it < len; it += 32)
-	{
+	int ans = 0;
+	asm(
+		".intel_syntax noprefix\n\t"
+		
+		"mov r10, %1\n\t"
+        "mov r9, %2\n\t"
 
-		__m256i str1_ = _mm256_load_si256((__m256i*) (str1 + it));
-		__m256i str2_ = _mm256_load_si256((__m256i*) (str2 + it));
+		"xor rax, rax\n\t"
+		"xor rdx, rdx\n\t"
 
-		__m256i cmp_ = _mm256_cmpeq_epi8(str1_, str2_);
+        ".loop:\n\t"
+            "mov al, byte ptr [r10]\n\t"
+            "mov dl, byte ptr [r9]\n\t"
+    	    
+			"cmp al, 0\n\t"
+    	    "je .end\n\t"
+			"cmp al, dl\n\t"
+    	    "jne .end\n\t"
 
-		size_t mask = _mm256_movemask_epi8(cmp_);
+    	    "inc r9\n\t"
+    	    "inc r10\n\t"
+    	    
+    	    "jmp .loop\n\t"
+        ".end:\n\t"
 
-		if (~mask) return 0;
-	}
+    	    "sub rax, rdx\n\t"
+			"mov %0, eax\n\t"
 
-	return 1;
+		 :"=r" (ans) 
+		 :"r" (str1), "r" (str2)				
+	);
+
+	return ans;
 }
 
-//========================================================================================YWORD
+//========================================================================================
+
+int StrcmpIntrinsic(const char *str1, const char *str2)
+{
+	__m256i str1_ = _mm256_load_si256((__m256i*) (str1));
+	__m256i str2_ = _mm256_load_si256((__m256i*) (str2));
+
+	__m256i cmp_ = _mm256_cmpeq_epi8(str1_, str2_);
+
+	size_t mask = _mm256_movemask_epi8(cmp_);
+
+	return (~mask != 0);
+}
+
+//========================================================================================

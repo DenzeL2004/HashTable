@@ -7,7 +7,6 @@ ListFindValNASM:
         test    rdi, rdi                        ;--------------------
         je      .not_find                       ;check list size != 0
         
- 
         mov     rcx, qword [rdi+8]              ;list size
 
         test    rcx, rcx                        ;--------------------
