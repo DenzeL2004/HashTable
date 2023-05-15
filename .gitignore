@@ -1,0 +1,21 @@
+temp/log_info.html
+*.o
+temp/result_distribution.csv
+run
+.vscode/settings.json
+temp/notoptimize.png
+callgrind*
+src/hash_table/hash_functions.cpp
+*perf*
+test/Makefile
+test/NASMCRC32.s
+test/printf.s
+test/test.cpp
+test/lst/NASMCRC32.lst
+random elements
+work without optimiztions:
+temp/without_optimization2.png
+src/nodelist/config_list.h
+src/nodelist/list.cpp
+src/nodelist/list.h
+massif.out.14150
