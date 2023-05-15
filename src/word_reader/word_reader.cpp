@@ -5,11 +5,14 @@
 
 
 
-static int      ReadFromFile     (Text *text_str, int fdin);
+static int      ReadFromFile    (Text *text_str, int fdin);
 
-static int      ParseText        (Text *text_str);
+static int      ParseText       (Text *text_str);
 
-static size_t   GetCountWord     (Text *text_str);
+static size_t   GetCountWord    (Text *text_str);
+
+
+static inline int   IsAlpha     (const char letter);
 
 
 //====================================================================================================
@@ -113,10 +116,10 @@ static int ParseText(Text *text_str)
 
     while (char_it < file_size)
     {
-        if (isalpha(text_str->buffer[char_it]))
+        if (IsAlpha(text_str->buffer[char_it]))
         {
             size_t start_pos = char_it;
-            while (char_it < file_size && isalpha(text_str->buffer[char_it]))
+            while (char_it < file_size && IsAlpha(text_str->buffer[char_it]))
             {
                 char_it++;
             }
@@ -147,10 +150,10 @@ static size_t GetCountWord(Text *text_str)
 
     while (char_it < file_siz)
     {
-        if (isalpha(text_str->buffer[char_it]))
+        if (IsAlpha(text_str->buffer[char_it]))
         {
             word_cnt++;
-            while (char_it < file_siz && isalpha(text_str->buffer[char_it]))
+            while (char_it < file_siz && IsAlpha(text_str->buffer[char_it]))
             {
                 char_it++;
             }
@@ -166,3 +169,9 @@ static size_t GetCountWord(Text *text_str)
 }
 
 //====================================================================================================
+
+
+static inline int IsAlpha(const char letter)
+{
+    return ((letter >= 'a') && (letter <= 'z')) || ((letter >= 'A') && (letter <= 'Z'));
+}
