@@ -96,23 +96,13 @@ static int TestFind(const Text *text)
     assert(text  != nullptr && "text is nullptr");
 
     Hash_table hash_table = {};
-    if (HashTableCtor(&hash_table, Hash_table_capacity, (hash_func_t)FastCRC32Hash))
+    if (HashTableCtor(&hash_table, Hash_table_capacity, (hash_func_t)CRC32Hash))
         return PROCESS_ERROR(DISTRIBUTION_TEST_ERR, "HashTableCtor failed.\n");
 
     LoadData(&hash_table, text);
+   
+    StartFind(&hash_table, text);
 
-    Text test_text = {};
-    
-    if (TextCtor(&test_text))
-        return PROCESS_ERROR(EXECUTE_TEST_ERR, "TextCtor failed\n");
-
-    if (GetText(&test_text, Test_input_file))
-        return PROCESS_ERROR(EXECUTE_TEST_ERR, "file: \'%s\' read failed, no tests run\n", Test_input_file);
-
-    StartFind(&hash_table, &test_text);
-
-    if (TextDtor(&test_text))
-        return PROCESS_ERROR(EXECUTE_TEST_ERR, "TextDtor failed\n");
 
     if (HashTableDtor(&hash_table))
         return PROCESS_ERROR(DISTRIBUTION_TEST_ERR, "HashTableDtor failed.\n");
@@ -125,6 +115,8 @@ static void StartFind(Hash_table *hash_table, const Text *text)
     assert(hash_table != nullptr && "hash table is nullptr");
     assert(text != nullptr && "text is nullptr");
 
+    srand(time(NULL));
+
     #ifdef PRINT_TIME
     
     clock_t time_start = clock();
@@ -133,7 +125,8 @@ static void StartFind(Hash_table *hash_table, const Text *text)
 
     for (size_t it = 0; it < Count_query; it++)
     {
-        size_t ind = HashTableFind(hash_table, text->words[it].str, text->words[it].str);
+        size_t find_ind =  it % text->word_cnt;
+        size_t ind = HashTableFind(hash_table, text->words[find_ind].str, text->words[find_ind].str);
     }
 
     #ifdef PRINT_TIME
