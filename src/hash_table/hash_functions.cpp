@@ -177,13 +177,19 @@ hash_t FastCRC32Hash(const hash_key_t key)
     assert(key != nullptr && "key pointer is nullptr");
 
     hash_t hash = 0;
-    size_t shift = 0;
-
-    for (size_t it = 0; it < 4; it++) 
-    {
-		hash = _mm_crc32_u32(hash, *(const uint32_t*)(key + shift));
-	    shift += sizeof(uint32_t);
-	}
+    
+    asm(
+        ".intel_syntax noprefix\n\t"
+        "xor     %0, %0\n\t"
+        "crc32   %0, dword ptr [%1]\n\t"
+        "crc32   %0, dword ptr [%1 + 4]\n\t"
+        "crc32   %0, dword ptr [%1 + 8]\n\t"
+        "crc32   %0, dword ptr [%1 + 12]\n\t"
+        
+        :"=r"(hash)          
+        :"r"(key)
+        
+    );
     
     return hash;
 }
