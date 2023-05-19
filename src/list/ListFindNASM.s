@@ -7,42 +7,35 @@ ListFindValNASM:
         test    rdi, rdi                        ;--------------------
         je      .not_find                       ;check list size != 0
         
-        mov     rcx, qword [rdi+8]              ;list size
+        mov     rcx, qword [rdi+8]
+        mov     rax, qword [rdi+32]
+        lea     rdx, [rcx-1]
+        test    rcx, rcx                        ;check size_list
+        je      .not_find
 
-        test    rcx, rcx                        ;--------------------
-        je      .not_find                       ;check list size != 0
+        mov     rdi, qword [rdi+24]
+        vmovdqa ymm1, yword [rsi]
 
-        mov     rax, qword [rdi+32]             ;list head ptr
-        
-        dec     rcx
-        
-        mov     rdi, qword [rdi+24]             ;list data address
-        vmovdqa ymm1, yword [rsi]               ;set to ymm input str
+        jmp     .start
 
-        jmp     .check_str
-
-.next_ind:
-
-        mov     rax, qword [rdx+8]              ;ans_ind = list->data[ind].next
-        
-        sub     rcx, 1
+.next_id:
+        mov     rax, qword [rcx+8]
+        sub     rdx, 1                          ;next id
         jb      .not_find
 
-.check_str:
+.start:
+        lea     rcx, [rax+rax*2]
+        lea     rcx, [rdi+rcx*8]
+        mov     rsi, qword  [rcx]
 
-        lea     rdx, [rax+rax*2]                ;calc index val
-        lea     rdx, [rdi+rdx*8]                ;--------------
+        vpcmpeqb        ymm0, ymm1, yword [rsi]
+        vpmovmskb       esi, ymm0
 
-        mov     rbx, qword [rdx]                ;current strinng address
+        cmp     esi, -1                         ;cmp string
+        jne     .next_id
         
-        vpcmpeqb        ymm0, ymm1, yword [rbx]
-        vpmovmskb       ebx, ymm0
-        
-        cmp     ebx, -1                         ;compare strings
-        jne     .next_ind
-
         ret
 
 .not_find:
-        xor eax, eax
+        xor     eax, eax
         ret
