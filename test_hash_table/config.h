@@ -17,6 +17,6 @@ const size_t Count_query = 20 * 1000 * 1000ul;
 
 #define TEST_FIND
 
-//#define PRINT_TIME
+#define PRINT_TIME
 
 #endif
